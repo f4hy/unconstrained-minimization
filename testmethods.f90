@@ -2,7 +2,7 @@
   
 program unittests
 
-  ! call testmacheps()
+  call testmacheps()
 
   call testcholsolve()
 
@@ -17,11 +17,14 @@ end program unittests
 
 subroutine testmacheps()
   use optimization
+
+  call UMINICK(1)
+
   if (1 + macheps/2 .NE. 1) then
      print *,  "macheps failed", macheps
      call exit(1)
   end if
-  print *, "macheps passed"
+  print *, "macheps passed", macheps
 end subroutine testmacheps
 
 

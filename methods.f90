@@ -36,7 +36,6 @@ module optimization
          macheps = macheps / 2.0e0
       end do
       macheps = macheps * 2.0e0
-      print *, macheps
       return 
     end function computemacheps
 
