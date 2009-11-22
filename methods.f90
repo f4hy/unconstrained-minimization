@@ -211,3 +211,73 @@ subroutine LTSOLVE(y,L,x)
 end subroutine LTSOLVE
 
 
+subroutine CHOLDECOMP(H,L,maxadd)
+  ! Find the LL^T decomposition of H+D. D is a diangonal to force
+  ! positive definateness.
+
+  ! Modified decomposition from Gill Murra and Wright
+  !
+  ! H is the input matrix (only upper tri used) (in) 
+  ! L is the LL^T decomposition (only lower tri used) (out)
+  ! maxadd is the largest component of D (out)
+
+  use optimization
+  implicit none
+  real, intent(in) :: H(n,n)
+  real, intent(out) :: L(n,n)
+  real, intent(out) :: maxadd
+
+  real :: minl,minl2,minljj
+  integer :: i,j,k
+
+
+  minl = sqrt(sqrt(macheps)) * maxoffl
+  
+  if ( maxoffl .eq. 0) then
+     maxoffl = sqrt(maxval(diag(H)))
+  end if
+
+  minl2 = sqrt(macheps) * maxoffl
+
+  maxadd = 0
+
+  do j=1,n
+     L(j,j) = H(j,j)
+     do i=1,j-1
+        L(j,j) = L(j,j) - L(j,i)**2
+     end do
+     minljj = 0
+     do i=j+1,n
+        L(i,j) = H(j,i)
+        do k=1,j-1
+           L(i,j) = L(i,j) - (L(i,k) * L(j,k))
+        end do
+        minljj = max(abs(L(i,j)),minljj)
+     end do
+     minljj = max(minljj/maxoffl,minl)
+     if (L(j,j) .gt. minljj**2) then !Normal Cholesky
+
+        L(j,j) = sqrt(L(j,j))
+     else
+        if (minljj .gt. minl2) then
+           minljj = minl2
+           maxadd = max(maxadd,minljj**2-L(j,j))
+           L(j,j) = minljj
+        end if
+     end if
+     do i = j+1,n
+        L(i,j) = L(i,j)/L(j,j)
+     end do
+  end do
+
+  contains
+    function diag(A) result(d)
+      
+      real :: A(:,:)
+      real :: d(size(A))
+      integer :: i
+      do i=1,sizeof(A)
+         d(i) = A(i,i)
+      end do
+    end function diag
+end subroutine CHOLDECOMP
