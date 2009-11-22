@@ -13,6 +13,9 @@ program unittests
 
   call testcholdecomp()
 
+  call testmodelhess()
+
+
   print *, "tests ran succuessfully"
 end program unittests
 
@@ -90,9 +93,29 @@ subroutine testcholdecomp()
 end subroutine testcholdecomp
 
 
+subroutine testmodelhess()
+  
+  real :: Sx(2,2)
+  real :: H(2,2)
+  real :: L(2,2)
+  
+  Sx = 1
+  L = 0
+  H = reshape( (/ 2,1,1,2 /), (/2,2/) )
+    
+  call UMINICK(2)
+  
+  call modelhess(Sx,H,L)
+  ! Subtract the answer since they should be within epsilon of the real answer
+  L = L - reshape( (/sqrt(2.0) , 1/sqrt(2.0) , 0.0 , sqrt(3.0/2.0)/) ,  (/2,2/) )
+  if(L(1,1) .ne. 0 .or. L(1,2).ne. 0 .or. L(2,1) .ne. 0 .or. L(2,2) .ne. 0) then
+     print *, "modelhess failed"
+     call exit(1)
+  end if
 
+  print *, "modelhess passed"
 
-
+end subroutine testmodelhess
 
 
 
