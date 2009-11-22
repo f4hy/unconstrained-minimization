@@ -229,6 +229,11 @@ subroutine CHOLDECOMP(H,L,maxadd)
   real :: minl,minl2,minljj
   integer :: i,j,k
 
+  minl=0.0
+  minl2=0.0
+  minljj=0.0
+  maxoffl = 0.0
+  L = 0
 
   minl = sqrt(sqrt(macheps)) * maxoffl
   
@@ -255,7 +260,6 @@ subroutine CHOLDECOMP(H,L,maxadd)
      end do
      minljj = max(minljj/maxoffl,minl)
      if (L(j,j) .gt. minljj**2) then !Normal Cholesky
-
         L(j,j) = sqrt(L(j,j))
      else
         if (minljj .gt. minl2) then
@@ -272,10 +276,10 @@ subroutine CHOLDECOMP(H,L,maxadd)
   contains
     function diag(A) result(d)
       
-      real :: A(:,:)
-      real :: d(size(A))
+      real :: A(n,n)
+      real :: d(n)
       integer :: i
-      do i=1,sizeof(A)
+      do i=1,n
          d(i) = A(i,i)
       end do
     end function diag

@@ -11,6 +11,7 @@ program unittests
   ! call testltsolve()
   ! 
 
+  call testcholdecomp()
 
   print *, "tests ran succuessfully"
 end program unittests
@@ -69,6 +70,24 @@ subroutine testcholsolve()
 
 end subroutine testcholsolve
 
+subroutine testcholdecomp()
+  real :: A(2,2)
+  real :: L(2,2)
+  real :: maxadd
+  A = reshape( (/ 1,0,0,1 /), (/2,2/) )
+  
+  call UMINICK(2)
+
+  call choldecomp(A,L,maxadd)
+  
+  if(L(1,1) .ne. 1 .or. L(1,2).ne. 0 .or. L(2,1) .ne. 0 .or. L(2,2) .ne. 1) then
+     print *, "choldecomp failed"
+     call exit(1)
+  end if
+
+
+  print *, "choldecomp passed"
+end subroutine testcholdecomp
 
 
 
