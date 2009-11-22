@@ -29,11 +29,18 @@ module optimization
 end module optimization
 
 
-! subroutine UMINICK(x0)
-!   use optimization
-!   real, intent(in) :: x0(n)
+subroutine UMINICK(x0)
+  use optimization
+  real, intent(in) :: x0(n)
 
-! end subroutine UMINICK
+  if (n.lt. 1) then
+     termcode = -1
+     return
+  end if
+
+  
+
+end subroutine UMINICK
 
 
 real function macheps()
