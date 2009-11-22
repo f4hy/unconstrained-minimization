@@ -21,6 +21,7 @@ module optimization
   real ::  steptol
   real :: maxoff
   real :: macheps
+  
 
   contains
     real function norm(v) 
@@ -223,9 +224,10 @@ subroutine CHOLDECOMP(H,maxoffl,L,maxadd)
   use optimization
   implicit none
   real, intent(in) :: H(n,n)
-  real, intent(inout) :: maxoffl
   real, intent(out) :: L(n,n)
   real, intent(out) :: maxadd
+  real :: maxoffl
+
 
   real :: minl,minl2,minljj
   integer :: i,j,k
@@ -314,6 +316,7 @@ subroutine modelhess(Sx,H,L)
   real :: sdd
   real :: maxoffl
 
+
   do i=1,n
      do j=i,n
         H(i,j) = H(i,j)/(Sx(i) * Sx(j))
@@ -356,7 +359,9 @@ subroutine modelhess(Sx,H,L)
 
   maxoffl = sqrt(max(maxdiag,(maxoff/n)))
 
+
   call choldecomp(H,maxoffl,L,maxadd)
+
 
   if (maxadd .gt. 0) then       !Not possitive deff
      maxev = H(1,1)
@@ -372,7 +377,9 @@ subroutine modelhess(Sx,H,L)
      H = H+(mu*ident())
   end if
 
-  call choldecomp(H,0,L,maxadd)
+  maxoffl = 0.0
+  call choldecomp(H,maxoffl,L,maxadd)
+
   
   ! Undo scaling
   do i=1,n
