@@ -13,7 +13,7 @@
 
 module optimization
   implicit none
-  integer n
+  integer :: n
   real :: typf
   real :: gradtol
   integer ::termcode
@@ -29,17 +29,22 @@ module optimization
 end module optimization
 
 
-subroutine UMINICK(x0)
+subroutine UMINICK(num)
   use optimization
-  real, intent(in) :: x0(n)
+  integer, intent(in) :: num
+  ! real, intent(in) :: x0(n)
 
-  print *, x0
+  n = num
+  ! NOT FINISHED THIS IS JUST FOR SANITY WHILE TESTING
+  
+
 
   if (n.lt. 1) then
      termcode = -1
      return
   end if
 
+  
   
 
 end subroutine UMINICK
@@ -156,6 +161,8 @@ subroutine CHOLSOLVE(grad,L,s)
 
   CALL LSOLVE(grad,L,s)
   CALL LTSOLVE(s,L,s)
+
+
   s = -s
 end subroutine CHOLSOLVE
 
@@ -173,7 +180,7 @@ subroutine LSOLVE(b,L,y)
   do i = 2, n
      y(i) = b(i)
      do j=1,i-1
-        y(i) = y(i) - L(i,j) * y(j)
+        y(i) = y(i) - (L(i,j) * y(j))
      end do
      y(i) = y(i) / L(i,i)
   end do
@@ -195,7 +202,7 @@ subroutine LTSOLVE(y,L,x)
   do i = n-1, 1,-1
      x(i) = y(i)
      do j=i+1,n
-        x(i) = x(i) - L(i,j) * x(j)
+        x(i) = x(i) - (L(j,i) * x(j))
      end do
      x(i) = x(i) / L(i,i)
   end do
