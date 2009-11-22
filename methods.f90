@@ -19,7 +19,7 @@ module optimization
   integer ::termcode
   integer :: retcode, itncount, itnlimit
   real ::  steptol
-  real :: maxoffl
+  real :: maxoff
   real :: macheps
 
   contains
@@ -210,7 +210,7 @@ subroutine LTSOLVE(y,L,x)
 end subroutine LTSOLVE
 
 
-subroutine CHOLDECOMP(H,L,maxadd)
+subroutine CHOLDECOMP(H,maxoffl,L,maxadd)
   ! Find the LL^T decomposition of H+D. D is a diangonal to force
   ! positive definateness.
 
@@ -223,6 +223,7 @@ subroutine CHOLDECOMP(H,L,maxadd)
   use optimization
   implicit none
   real, intent(in) :: H(n,n)
+  real, intent(inout) :: maxoffl
   real, intent(out) :: L(n,n)
   real, intent(out) :: maxadd
 
@@ -232,7 +233,6 @@ subroutine CHOLDECOMP(H,L,maxadd)
   minl=0.0
   minl2=0.0
   minljj=0.0
-  maxoffl = 0.0
   L = 0
 
   minl = sqrt(sqrt(macheps)) * maxoffl
@@ -284,3 +284,136 @@ subroutine CHOLDECOMP(H,L,maxadd)
       end do
     end function diag
 end subroutine CHOLDECOMP
+
+subroutine modelhess(Sx,H,L)
+  ! Force H to be positive definite by adding to the diagonal.
+  ! Then calculate the decomposition of H into LL^T
+  !
+  ! Needs macheps from the module
+  ! Calls CHOLDECOMP
+  !
+  ! Sx is the scaling factors as input
+  ! H is input as the hessian and output to be positive definiate
+  ! L is the lower triangular decompposition of H (after modified)
+  ! 
+  use optimization
+  
+  implicit none
+  real, intent(in) :: Sx(n)
+  real, intent(inout) :: H(n,n)
+  real, intent(out) :: L(n,n)
+
+  integer :: i,j
+
+  real:: sqrteps
+  real :: mu
+  real :: maxdiag, mindiag, maxposdiag
+  real :: maxadd
+  real :: maxev,minev
+  real :: offrow
+  real :: sdd
+  real :: maxoffl
+
+  do i=1,n
+     do j=i,n
+        H(i,j) = H(i,j)/(Sx(i) * Sx(j))
+     end do
+  end do
+
+
+  sqrteps = sqrt(macheps)
+  
+
+  maxdiag = maxval(diag(H))
+  
+  mindiag = minval(diag(H))
+
+  maxposdiag = max(0.0,maxdiag)
+  
+  if (mindiag .le. sqrteps * maxposdiag) then
+     mu = 2 * (maxposdiag - mindiag) * sqrteps - mindiag
+     maxdiag = maxdiag + mu
+  else
+     mu =0
+  end if
+  maxoff = maxval(H-(maxdiag*ident())) !Clever trick, but probably
+                                     !inefficent. There should be a
+                                     !better way of doing this using
+                                     !where statments
+  if (maxoff *(1+2*sqrteps) .gt. maxdiag) then
+     mu = mu+(maxoff-maxdiag) + 2*sqrteps *maxoff
+     maxdiag = maxoff *(1+2*sqrteps)
+  end if
+
+  if (maxdiag .eq.0) then
+     mu = 1
+     maxdiag = 1
+  end if
+
+  if (mu .gt. 0) then
+     H = H + (mu*ident())
+  end if
+
+  maxoffl = sqrt(max(maxdiag,(maxoff/n)))
+
+  call choldecomp(H,maxoffl,L,maxadd)
+
+  if (maxadd .gt. 0) then       !Not possitive deff
+     maxev = H(1,1)
+     minev = H(1,1)
+     ! REMOVED A SUM (YAY VECTOR OPS)
+     offrow = sum(H) - sum(diag(H))
+     maxev = maxval(diag(H))+offrow
+     minev = minval(diag(H))-offrow
+     !
+     sdd = max((maxev-minev)*sqrteps-minev,0.0)
+     mu = min(maxadd,sdd)
+     
+     H = H+(mu*ident())
+  end if
+
+  call choldecomp(H,0,L,maxadd)
+  
+  ! Undo scaling
+  do i=1,n
+     do j=i,n
+        H(i,j) = H(i,j)*Sx(i)*Sx(j)
+     end do
+     do j=1,i
+        L(i,j) = L(i,j) * Sx(i)
+     end do
+  end do
+  
+contains
+  function diag(A) result(d)
+    
+    real :: A(n,n)
+    real :: d(n)
+    integer :: i
+    do i=1,n
+       d(i) = A(i,i)
+    end do
+  end function diag
+  
+  function ident() result(I)
+    real :: I(n,n)
+    integer :: j
+    I =0
+    do j=1,n
+       I(j,j) = 1.0
+    end do
+  end function ident
+
+  function lowermask() result(L)
+    real :: L(n,n)
+    integer :: i,j
+    L = 0
+    do i=1,n
+       do j=1,i
+          L(i,j) = 1
+       end do
+    end do
+  end function lowermask
+  
+
+end subroutine modelhess

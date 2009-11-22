@@ -78,7 +78,7 @@ subroutine testcholdecomp()
   
   call UMINICK(2)
 
-  call choldecomp(A,L,maxadd)
+  call choldecomp(A,0,L,maxadd)
   
   if(L(1,1) .ne. 1 .or. L(1,2).ne. 0 .or. L(2,1) .ne. 0 .or. L(2,2) .ne. 1) then
      print *, "choldecomp failed"
