@@ -42,6 +42,19 @@ module optimization
 
 end module optimization
 
+subroutine initalize(num)
+  use optimization
+  integer, intent(in) :: num
+  n = num
+  if (n.lt. 1) then
+     termcode = -1
+     return
+  end if
+
+  macheps = computemacheps()
+  
+end subroutine INITALIZE
+
 
 subroutine UMINICK(num)
   use optimization

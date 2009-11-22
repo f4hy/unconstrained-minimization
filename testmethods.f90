@@ -22,7 +22,7 @@ end program unittests
 subroutine testmacheps()
   use optimization
 
-  call UMINICK(1)
+  call INITALIZE(1)
 
   if (1 + macheps/2 .NE. 1) then
      print *,  "macheps failed", macheps
@@ -45,7 +45,7 @@ subroutine testcholsolve()
   A = reshape( (/ 1,0,3,4 /), (/2 , 2/) )
   b = (/4,4/)
 
-  call UMINICK(2)
+  call INITALIZE(2)
 
   call CHOLSOLVE(b,A,y)
 
@@ -58,7 +58,7 @@ subroutine testcholsolve()
   C = reshape( (/ 1,0,0,2,3,0,4,5,6 /), (/3,3/) )
   d = (/18,18,18/)
 
-  call UMINICK(3)
+  call INITALIZE(3)
 
   call CHOLSOLVE(d,C,w)
 
@@ -79,7 +79,7 @@ subroutine testcholdecomp()
   real :: maxadd
   A = reshape( (/ 1,0,0,1 /), (/2,2/) )
   
-  call UMINICK(2)
+  call INITALIZE(2)
 
   call choldecomp(A,maxoffl,L,maxadd)
   
@@ -103,7 +103,7 @@ subroutine testmodelhess()
   L = 0
   H = reshape( (/ 2,1,1,2 /), (/2,2/) )
     
-  call UMINICK(2)
+  call INITALIZE(2)
   
   call modelhess(Sx,H,L)
   ! Subtract the answer since they should be within epsilon of the real answer
@@ -138,7 +138,7 @@ end subroutine testmodelhess
 
 
 
-!   call UMINICK(2)
+!   call INITALIZE(2)
 
 !   call Lsolve(b,A,y)
 
@@ -150,7 +150,7 @@ end subroutine testmodelhess
 !   C = reshape( (/ 1,0,0,2,3,0,4,5,6 /), (/3,3/) )
 !   d = (/9,9,9/)
 
-!   call UMINICK(3)
+!   call INITALIZE(3)
 
 !   call Lsolve(d,C,w)
 
@@ -176,7 +176,7 @@ end subroutine testmodelhess
 !   A = reshape( (/ 1,0,3,4 /), (/2 , 2/) )
 !   b = (/4,4/)
 
-!   call UMINICK(2)
+!   call INITALIZE(2)
 
 !   call Ltsolve(b,A,y)
 
@@ -190,7 +190,7 @@ end subroutine testmodelhess
 !   C = reshape( (/ 1,0,0,2,3,0,4,5,6 /), (/3,3/) )
 !   d = 18
 
-!   call UMINICK(3)
+!   call INITALIZE(3)
 
 !   call Ltsolve(d,C,w)
 
