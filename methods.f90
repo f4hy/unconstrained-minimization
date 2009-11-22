@@ -33,6 +33,8 @@ subroutine UMINICK(x0)
   use optimization
   real, intent(in) :: x0(n)
 
+  print *, x0
+
   if (n.lt. 1) then
      termcode = -1
      return
@@ -144,4 +146,60 @@ subroutine UMSTOP(xplus,xc,func,grad,Sx,consecmax,maxtaken)
   end if
   
 end subroutine UMSTOP
+
+subroutine CHOLSOLVE(grad,L,s)
+  ! Solves (LL^T)s = -g for s
+  use optimization
+  real, intent(in) :: grad(n)
+  real, intent(in) :: L(n,n)    !should be lower triangular
+  real, intent(out) :: s(n)
+
+  CALL LSOLVE(grad,L,s)
+  CALL LTSOLVE(s,L,s)
+  s = -s
+end subroutine CHOLSOLVE
+
+subroutine LSOLVE(b,L,y)
+  ! Solve Ly = b for y
+  use optimization
+  implicit none
+  real, intent(in) :: L(n,n)
+  real, intent(in) :: b(n)
+  real, intent(out) :: y(n)
+  
+  integer :: i,j
+
+  y(1) = b(1)/L(1,1)
+  do i = 2, n
+     y(i) = b(i)
+     do j=1,i-1
+        y(i) = y(i) - L(i,j) * y(j)
+     end do
+     y(i) = y(i) / L(i,i)
+  end do
+
+end subroutine LSOLVE
+
+subroutine LTSOLVE(y,L,x)
+  ! Solve L^Tx = y for x
+  use optimization
+  implicit none
+  real, intent(in) :: L(n,n)
+  real, intent(in) :: y(n)
+  real, intent(out) :: x(n)
+  
+  integer :: i,j
+
+  x(n) = y(n) / L(n,n)
+  
+  do i = n-1, 1,-1
+     x(i) = y(i)
+     do j=i+1,n
+        x(i) = x(i) - L(i,j) * x(j)
+     end do
+     x(i) = x(i) / L(i,i)
+  end do
+
+end subroutine LTSOLVE
+
 
