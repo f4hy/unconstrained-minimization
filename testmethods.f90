@@ -2,7 +2,7 @@
   
 program unittests
 
-  call testmacheps()
+  ! call testmacheps()
 
   call testcholsolve()
 
@@ -16,9 +16,9 @@ program unittests
 end program unittests
 
 subroutine testmacheps()
-  real, external :: macheps
-  if (1 + macheps()/2 .NE. 1) then
-     print *,  "macheps failed", macheps()
+  use optimization
+  if (1 + macheps/2 .NE. 1) then
+     print *,  "macheps failed", macheps
      call exit(1)
   end if
   print *, "macheps passed"

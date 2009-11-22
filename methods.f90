@@ -19,13 +19,27 @@ module optimization
   integer ::termcode
   integer :: retcode, itncount, itnlimit
   real ::  steptol
-  
+  real :: maxoffl
+  real :: macheps
 
   contains
     real function norm(v) 
       real :: v(:)
       norm = sqrt(sum(v*v))
     end function norm
+    real function computemacheps()
+      ! Determine the smallest possible real epsilon that makes an
+      ! additive change for the given precision
+      implicit none
+      macheps = 1.0e0
+      do while(1.0e0+macheps .NE. 1.0e0)
+         macheps = macheps / 2.0e0
+      end do
+      macheps = macheps * 2.0e0
+      print *, macheps
+      return 
+    end function computemacheps
+
 end module optimization
 
 
@@ -44,24 +58,11 @@ subroutine UMINICK(num)
      return
   end if
 
-  
-  
+  macheps = computemacheps()
 
 end subroutine UMINICK
 
 
-real function macheps()
-  ! Determine the smallest possible real epsilon that makes an
-  ! additive change for the given precision
-  implicit none
-  macheps = 1.0e0
-  do while(1.0e0+macheps .NE. 1.0e0)
-     macheps = macheps / 2.0e0
-  end do
-  macheps = macheps * 2.0e0
-  print *, macheps
-  return 
-end function macheps
 
 subroutine UMSTOP0(x0,func,grad,Sx,consecmax)
   ! Decide weather to terminate after iteraction zero because x0 is
