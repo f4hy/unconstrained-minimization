@@ -14,13 +14,23 @@
 module optimization
   implicit none
   integer :: n
-  real :: typf
-  real :: gradtol
+  real :: typf = 1
+  real :: gradtol = 0
   integer ::termcode
-  integer :: retcode, itncount, itnlimit
-  real ::  steptol
+  integer :: retcode, iterations
+
+
+  real ::  steptol = 1.0e-8
   real :: maxoff
   real :: macheps
+  integer :: consecmax
+  logical :: maxtaken
+  integer :: method
+
+  real :: globtol = 1.0e-8
+
+  integer, parameter :: linsearch = 1
+  integer, parameter :: maxiterations = 100
   
 
   contains
@@ -67,17 +77,19 @@ subroutine UMINICK(num)
 
 
   if (n.lt. 1) then
-     termcode = -1
-     return
+     print *, "N must be at least one"
+     call exit
   end if
 
   macheps = computemacheps()
+
+  
 
 end subroutine UMINICK
 
 
 
-subroutine UMSTOP0(x0,func,grad,Sx,consecmax)
+subroutine UMSTOP0(x0,func,grad,Sx)
   ! Decide weather to terminate after iteraction zero because x0 is
   ! too close to a critical point
   
@@ -89,7 +101,6 @@ subroutine UMSTOP0(x0,func,grad,Sx,consecmax)
   real, intent(in) :: func
   real, intent(in) :: grad(n)
   real, intent(in) :: Sx(n)
-  integer, intent(out) :: consecmax
   real :: temp(n)               !Temp storage while looking for max
                                 !(The compiler should optimize this
                                 !away if it is smart)
@@ -97,7 +108,7 @@ subroutine UMSTOP0(x0,func,grad,Sx,consecmax)
 
   consecmax = 0
   
-  do i=0,n
+  do i=1,n
      temp(i) = abs(grad(i)) * (max(abs(x0(i)),1/Sx(i)) / max(abs(func),typf))
   end do
   if (maxval(temp) .le. gradtol * 1.0e-3 ) then
@@ -107,11 +118,11 @@ subroutine UMSTOP0(x0,func,grad,Sx,consecmax)
   termcode = 0
 end subroutine UMSTOP0
 
-subroutine UMSTOP(xplus,xc,func,grad,Sx,consecmax,maxtaken)
+subroutine UMSTOP(xplus,xc,func,grad,Sx)
   ! Decide weather to terminate after iteraction zero because x0 is
   ! too close to a critical point
 
-  ! Uses n, typf, retcode, gradtol, steptol, itncount, itnlimit from module
+  ! Uses n, typf, retcode, gradtol, steptol, iterations, maxiterations from module
   use optimization
   implicit none
   real, intent(in) :: xplus(n)
@@ -119,8 +130,6 @@ subroutine UMSTOP(xplus,xc,func,grad,Sx,consecmax,maxtaken)
   real, intent(in) :: func
   real, intent(in) :: grad(n)
   real, intent(in) :: Sx(n)
-  integer, intent(inout) :: consecmax
-  logical, intent(out) :: maxtaken
   real :: temp(n) 
   integer :: i
 
@@ -131,29 +140,34 @@ subroutine UMSTOP(xplus,xc,func,grad,Sx,consecmax,maxtaken)
      return
   else
      
-     do i=0,n
-        temp(i) = abs(grad(i)) * (max(abs(xplus(i)),1/Sx(i)) / max(abs(func),typf))
-     end do
+     ! do i=1,n
+     !    temp(i) = abs(grad(i)) * (max(abs(xplus(i)),1/Sx(i)) / max(abs(func),typf))
+     ! end do
+     ! if (maxval(temp) .le. gradtol) then
+     temp = abs(grad)
      if (maxval(temp) .le. gradtol) then
+        print *, "gradient small, local minimum found"
         termcode = 1 
-
         return
      end if
      
-     do i=0,n
+     do i=1,n
         temp(i) = abs(xplus(i) - xc(i)) / max(abs(xplus(i)),1/Sx(i))
      end do
      
      if(maxval(temp) .le. steptol) then
+        print *, "Converged within tolerance after",iterations, "iterations"
         termcode = 2
         return
-     else if (itncount .ge. itnlimit) then
+     else if (iterations .ge. maxiterations) then
+        print *, "Did not converge after",maxiterations, "steps"
         termcode = 4
         return
 
      else if(maxtaken) then
         consecmax = consecmax +1
         if (consecmax .eq. 5) then 
+           print *, "Five steps of max lenght were taken"
            termcode = 5
            return
         end if
@@ -437,3 +451,7 @@ contains
   
 
 end subroutine modelhess
+
+
+
+
