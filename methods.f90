@@ -19,12 +19,14 @@ module optimization
   integer ::termcode
   integer :: retcode, iterations
 
+  real :: maxstep = 1.0e8
 
   real ::  steptol = 1.0e-8
   real :: maxoff
   real :: macheps
   integer :: consecmax
   logical :: maxtaken
+  logical :: hook = .FALSE.
   integer :: method
 
   real :: globtol = 1.0e-8
@@ -453,5 +455,109 @@ contains
 end subroutine modelhess
 
 
+subroutine trustregionupdate(x,fc,grad,funct,L,step,H,delta,xprev,fprev,nextx,nextf)
+  use optimization
+  implicit none
+  real, intent(in) :: x(n)
+  real, intent(in) :: fc     !f(x)
+  real, intent(in) :: grad(n)  
+  real, intent(in) :: L(n,n)  
+  real, intent(in) :: H(n,n)    !Model hessian
+  real, intent(in) :: step(n)  
+  real, intent(inout) :: delta
+  real, intent(inout) :: xprev(n)
+  real, intent(inout) :: fprev
 
+  interface
+     real function funct(p)
+       real, dimension(size(x)) :: p
+     end function funct
+  end interface
+  
+  real, intent(out) :: nextx(n)
+  real, intent(out) :: nextf
+  
+  integer :: i,j
+  real :: dF,dfpred
+  real :: deltatemp
+  real :: alpha = 1.0e-4
+  real :: initslope
+  real :: rellength
+  real :: temp
+
+  maxtaken = .FALSE.
+
+  
+  
+  nextx = x+step
+  nextf = funct(nextx)
+  dF = nextf - fc
+  
+  initslope = dot_product(grad,step)
+
+  if (retcode .ne. 3) fprev = 0
+
+  if (retcode .eq. 3 .and. nextf .ge. fprev .or. dF .gt. 1.0e-4 * initslope ) then
+     nextx = xprev
+     nextf = fprev
+     delta = delta/2.0
+     retcode =0
+     return
+  end if
+
+  if(df .ge. alpha * initslope) then
+     ! f(nextx) too large
+
+     rellength = maxval(abs(step)/abs(nextx))
+     if (rellength .lt. steptol) then
+        !  nextx-x is too small
+        retcode = 1
+        nextx = x
+     else
+        retcode = 2
+        deltatemp = -initslope * norm(step) / (2 * (df - initslope) )
+        if (deltatemp .lt. 0.1*delta) then
+           delta = 0.1 * delta
+        else if (deltatemp .gt. 0.5*delta ) then
+           delta = 0.5 * delta
+        else
+           delta = deltatemp
+        end if
+     end if
+  else
+     dfpred = initslope
+     if (hook) then !hook step
+        do i = 1,n
+           temp = 0.5 * H(i,i) * step(i)**2
+           do j = i+1,n
+              temp = temp + H(i,j) * step(i) * step(j)
+           end do
+           dfpred = dfpred + temp
+        end do
+     else                       !Dog leg
+        do i=1,n
+           do j=i,n
+              temp = L(j,i) * step(j)
+           end do
+           dfpred = dfpred + (temp * temp/2)
+        end do
+     end if
+     if (retcode .ne. 2 .and. abs(dfpred - df) .le. 0.1 * abs(df) .or. df .le. initslope .and. delta .le. .99 *maxstep) then
+        retcode = 3
+        xprev = nextx
+        fprev = nextf
+        delta = min(2 * delta, maxstep)
+     else
+        retcode = 0
+        if (norm(step) .ge. 0.99 * maxstep) then
+           maxtaken = .TRUE.
+        else if(df .le. 0.75 * dfpred) then
+           delta = min(2*delta,maxstep)
+        end if
+        
+     end if
+  end if
+
+
+end subroutine trustregionupdate
 
