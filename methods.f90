@@ -26,6 +26,7 @@ module optimization
   real :: macheps
   integer :: consecmax
   logical :: maxtaken
+  logical :: newttaken
   logical :: hook = .FALSE.
   integer :: method
 
@@ -455,14 +456,15 @@ contains
 end subroutine modelhess
 
 
-subroutine trustregionupdate(x,fc,grad,funct,L,step,H,delta,xprev,fprev,nextx,nextf)
+subroutine trustregionupdate(x,fc,grad,funct,L,step,delta,xprev,fprev,nextx,nextf,Hessian)
   use optimization
   implicit none
   real, intent(in) :: x(n)
   real, intent(in) :: fc     !f(x)
   real, intent(in) :: grad(n)  
   real, intent(in) :: L(n,n)  
-  real, intent(in) :: H(n,n)    !Model hessian
+  optional :: Hessian
+  real, intent(in) :: Hessian(n,n)    !Model hessian
   real, intent(in) :: step(n)  
   real, intent(inout) :: delta
   real, intent(inout) :: xprev(n)
@@ -526,11 +528,11 @@ subroutine trustregionupdate(x,fc,grad,funct,L,step,H,delta,xprev,fprev,nextx,ne
      end if
   else
      dfpred = initslope
-     if (hook) then !hook step
+     if (present(Hessian)) then  !hook step
         do i = 1,n
-           temp = 0.5 * H(i,i) * step(i)**2
+           temp = 0.5 * Hessian(i,i) * step(i)**2
            do j = i+1,n
-              temp = temp + H(i,j) * step(i) * step(j)
+              temp = temp + Hessian(i,j) * step(i) * step(j)
            end do
            dfpred = dfpred + temp
         end do
@@ -542,7 +544,8 @@ subroutine trustregionupdate(x,fc,grad,funct,L,step,H,delta,xprev,fprev,nextx,ne
            dfpred = dfpred + (temp * temp/2)
         end do
      end if
-     if (retcode .ne. 2 .and. abs(dfpred - df) .le. 0.1 * abs(df) .or. df .le. initslope .and. delta .le. .99 *maxstep) then
+     if (retcode .ne. 2 .and. abs(dfpred - df) .le. 0.1 * abs(df) .or. df .le. initslope &
+          & .and. .not. newttaken  .and. delta .le. .99 *maxstep) then
         retcode = 3
         xprev = nextx
         fprev = nextf
@@ -561,7 +564,7 @@ subroutine trustregionupdate(x,fc,grad,funct,L,step,H,delta,xprev,fprev,nextx,ne
 
 end subroutine trustregionupdate
 
-subroutine dogstep(grad,L,Sn,newtlen,delta,firstdog,cauchylen,eta,shat,vhat,step,newttaken)
+subroutine dogstep(grad,L,Sn,newtlen,delta,firstdog,cauchylen,eta,shat,vhat,step)
   use optimization
   implicit none
   
@@ -576,7 +579,6 @@ subroutine dogstep(grad,L,Sn,newtlen,delta,firstdog,cauchylen,eta,shat,vhat,step
   real, intent(inout) :: shat(n)
   real, intent(inout) :: vhat(n)
   real, intent(out) :: step(n)
-  logical, intent(out) :: newttaken
 
   integer :: i,j
   real :: lambda
@@ -625,3 +627,50 @@ subroutine dogstep(grad,L,Sn,newtlen,delta,firstdog,cauchylen,eta,shat,vhat,step
      end if
   end if
 end subroutine dogstep
+
+
+subroutine dogdriver(x0,f0,grad,funct,L,Sn,delta,nextx,nextf)
+  use optimization
+  implicit none
+  
+  real, intent(in) :: x0(n)
+  real, intent(in) :: f0
+  real, intent(in) :: grad(n,n)
+  
+  interface
+     real function funct(p)
+       real, dimension(size(x0)) :: p
+     end function funct
+  end interface
+
+  real, intent(in) :: L(n,n)
+  real, intent(in) :: Sn(n)
+  
+  real, intent(inout) :: delta
+  
+  real, intent(out) :: nextx(n)
+  real, intent(out) :: nextf
+
+
+  logical :: firstdog = .TRUE.
+  
+  real :: newtlen
+
+  real :: cauchylen
+  real :: eta
+  real :: shat(n)
+  real :: vhat(n)
+  real :: xprev(n)
+  real :: fprev
+  real :: step(n)
+
+  retcode = 4
+
+  newtlen = norm(Sn)
+  
+  do while(retcode .GT. 1)
+     call dogstep(grad,L,Sn,newtlen,delta,firstdog,cauchylen,eta,shat,vhat,step)
+     call trustregionupdate(x0,f0,grad,funct,L,step,delta,xprev,fprev,nextx,nextf)
+  end do
+  
+end subroutine dogdriver
