@@ -561,3 +561,67 @@ subroutine trustregionupdate(x,fc,grad,funct,L,step,H,delta,xprev,fprev,nextx,ne
 
 end subroutine trustregionupdate
 
+subroutine dogstep(grad,L,Sn,newtlen,delta,firstdog,cauchylen,eta,shat,vhat,step,newttaken)
+  use optimization
+  implicit none
+  
+  real, intent(in) :: grad(n)
+  real, intent(in) :: L(n,n)
+  real, intent(in) :: Sn(n)
+  real, intent(in) :: newtlen
+  real, intent(inout) :: delta
+  logical, intent(inout) :: firstdog
+  real, intent(inout) :: cauchylen
+  real, intent(inout) :: eta
+  real, intent(inout) :: shat(n)
+  real, intent(inout) :: vhat(n)
+  real, intent(out) :: step(n)
+  logical, intent(out) :: newttaken
+
+  integer :: i,j
+  real :: lambda
+  real :: temp
+  real :: tempv
+  real :: alpha,beta
+  
+  if (newtlen .lt. delta) then
+     newttaken = .TRUE.
+     step = Sn
+     delta = newtlen
+     return
+  else
+     newttaken = .FALSE.
+     if (firstdog) then
+        firstdog = .FALSE.
+        alpha = norm(grad)**2
+        beta = 0
+        do i = 1,n
+           temp = 0
+           do j=1,n
+              temp = temp +L(j,i) *grad(j)
+           end do
+           beta = beta + temp*temp
+        end do
+        shat = (alpha/beta) * grad
+        cauchylen = alpha * sqrt(alpha) / beta
+        eta = 0.2+(0.8*alpha**2/(beta * abs(dot_product(grad,Sn))))
+        vhat = eta*Sn-shat
+        if (delta .eq. -1) then
+           delta = min(cauchylen,maxstep)
+        end if
+     end if
+     if(eta * newtlen .lt. delta) then
+        step = (delta/newtlen) * Sn
+        return
+     else if (cauchylen .ge. delta) then
+        step = (delta/ cauchylen) * shat
+        return
+     else
+        temp = dot_product(vhat,shat)
+        tempv = dot_product(vhat,vhat)
+        lambda = (-temp + sqrt( temp**2 - tempv * (cauchylen**2-delta**2))) * tempv
+        step = shat + lambda*vhat
+        
+     end if
+  end if
+end subroutine dogstep
