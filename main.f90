@@ -1,5 +1,6 @@
 subroutine minimize(x0,fn,grad,hessian)
   use optimization
+  implicit none
   real, intent(in) :: x0(n)
 
   optional :: hessian
@@ -59,7 +60,7 @@ subroutine minimize(x0,fn,grad,hessian)
     
   ! call UMSTOP0(x0,fn(x0),grad(x0),Sx,consecmax)
 
-  do iteration=0,maxiterations
+  do iterations=0,maxiterations
      call takestep()
 
      call UMSTOP(xstep,x,fn(xstep),grad(xstep),Scaling)
@@ -71,7 +72,6 @@ subroutine minimize(x0,fn,grad,hessian)
   end do
 
   print *, "reached max iterations"
-  print *, iteration
 
   contains
     subroutine takestep()
