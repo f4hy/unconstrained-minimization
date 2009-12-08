@@ -32,6 +32,12 @@ module optimization
 
   real :: globtol = 1.0e-8
 
+  integer, parameter :: analytic = 0
+  integer, parameter :: fullfd = 1
+  integer, parameter :: fdhessf = 2
+  integer, parameter :: fdhessg = 2
+  integer :: selection
+
   integer, parameter :: linsearch = 1
   integer, parameter :: maxiterations = 10000
   
@@ -66,6 +72,8 @@ subroutine initalize(num)
 
   call computemacheps()
   
+  selection = analytic
+
 end subroutine INITALIZE
 
 
@@ -594,7 +602,6 @@ subroutine dogstep(grad,L,Sn,newtlen,delta,firstdog,cauchylen,eta,shat,vhat,step
   real :: temp
   real :: tempv
   real :: alpha,beta
-  
 
   if (newtlen .lt. delta) then
      newttaken = .TRUE.
@@ -746,91 +753,35 @@ subroutine FDJAC(x0,f0,grad,Jacob)
 
 end subroutine FDJAC
 
-subroutine FDHESSG(x0,g0,grad,H)
+
+  
+function ffdhessf(x0) result(H)
   use optimization
+  use analytics
   implicit none
   
   real, intent(in) :: x0(n)
-  real, intent(in) :: g0(n)
-  interface
-     function grad(p) Result(del)
-       use size
-       real :: p(n)
-       real :: del(n)
-     end function grad
-  end interface
+  ! real, intent(in) :: f0
+  ! interface
+  !    real function fn(p)
+  !      use size
+  !      real :: p(n)
+  !    end function fn
+  ! end interface
   
-  real, intent(out) :: H(n,n)
-
-  integer :: i,j
-
-  call FDJAC(x0,g0,grad,H)
-  do i =1,n-1
-     do j =i+1,n
-        H(i,j) = (H(i,j)+H(j,i))/2
-     end do
-  end do
-end subroutine FDHESSG
-  
-subroutine FDGRAD(x0,f0,fn,g)
-  use optimization
-  implicit none
-  
-  real, intent(in) :: x0(n)
-  real, intent(in) :: f0
-  interface
-     real function fn(p)
-       use size
-       real :: p(n)
-     end function fn
-  end interface
-  real, intent(out) :: g(n)
-  
-  real :: sqrteta
-  real :: stepsizej
-  real :: tempj
-  real :: tempx(n)
-  integer :: i,j
-
-  tempx = x0
-  sqrteta = sqrt(macheps)
-
-  print *,"sqrteta", sqrteta
-
-  do j=1,n
-     stepsizej = sqrteta * tempx(j)
-     tempj = tempx(j)
-     tempx(j) = tempx(j) + stepsizej
-     stepsizej = tempx(j) - tempj
-     g(j) = ( fn(tempx)-f0)/stepsizej
-     tempx(j) = tempj
-  end do
-end subroutine FDGRAD
-  
-subroutine fdhessf(x0,f0,fn,H)
-  use optimization
-  implicit none
-  
-  real, intent(in) :: x0(n)
-  real, intent(in) :: f0
-  interface
-     real function fn(p)
-       use size
-       real :: p(n)
-     end function fn
-  end interface
-  
-  real, intent(out) :: H(n,n)
+  real :: H(n,n)
   
   real :: cuberteta
   integer :: i,j
   real :: stepsize(n)
   real :: tempi,tempj,tempx(n)
   real :: fneighbor(n),fii,fij
+  real :: f0
+
+  f0 = fn(x0)
 
   H = 0
 
-  print *, "fn",fn(x0)
   
   tempx = x0
   cuberteta = macheps**(1.0/3.0)
@@ -842,17 +793,14 @@ subroutine fdhessf(x0,f0,fn,H)
      fneighbor(i) = fn(tempx)
      tempx(i) = tempi
   end do
-  print *, stepsize
 
   do i =1,n
      tempi = tempx(i)
      tempx(i) = tempx(i) + 2*stepsize(i)
      fii = fn(tempx)
      H(i,i) = (f0-fneighbor(i) + (fii-fneighbor(i)))/(stepsize(i)*stepsize(i))
-     print *, (stepsize(i)*stepsize(i))
      tempx(i) = tempi + stepsize(i)
      do j =i+1,n
-        print *, i,j
         tempj = tempx(j)
         tempx(j) = tempx(j) + stepsize(j)
         fij = fn(tempx)
@@ -861,4 +809,56 @@ subroutine fdhessf(x0,f0,fn,H)
      end do
      tempx(i) = tempi
   end do
-end subroutine fdhessf
+end function ffdhessf
+
+function FFDGRAD(x0) result(g)
+  use optimization
+  use analytics
+  implicit none
+  
+  real, intent(in) :: x0(n)
+  real :: g(n)
+  
+  real :: sqrteta
+  real :: stepsizej
+  real :: tempj
+  real :: tempx(n)
+  integer :: i,j
+  real :: f0
+
+  f0 = fn(x0)
+
+  tempx = x0
+  sqrteta = sqrt(macheps)
+
+
+  do j=1,n
+     stepsizej = sqrteta * tempx(j)
+     tempj = tempx(j)
+     tempx(j) = tempx(j) + stepsizej
+     stepsizej = tempx(j) - tempj
+     g(j) = ( fn(tempx)-f0)/stepsizej
+     tempx(j) = tempj
+  end do
+end function FFDGRAD
+
+  
+function FFDHESSG(x0) result(H)
+  use optimization
+  use analytics
+  implicit none
+  
+  real, intent(in) :: x0(n)
+  
+  real :: H(n,n)
+  real :: g0(n)
+  integer :: i,j
+  g0 = grad(x0)
+
+  call FDJAC(x0,g0,grad,H)
+  do i =1,n-1
+     do j =i+1,n
+        H(i,j) = (H(i,j)+H(j,i))/2
+     end do
+  end do
+end function FFDHESSG

@@ -43,6 +43,32 @@ subroutine minimize(x0,fn,grad,hessian)
           end function hessian
        end interface
      end subroutine backtrackinglinesearch
+     function ffdhessf(x0) result(H)
+       use optimization
+       use analytics
+       implicit none
+       
+       real, intent(in) :: x0(n)
+       
+       real :: H(n,n)
+     end function ffdhessf
+     function FFDGRAD(x0) result(g)
+       use optimization
+       use analytics
+       implicit none
+       
+       real, intent(in) :: x0(n)
+       real :: g(n)
+     end function FFDGRAD
+     function FFDHESSG(x0) result(H)
+       use optimization
+       use analytics
+       implicit none
+       
+       real, intent(in) :: x0(n)
+       
+       real :: H(n,n)
+     end function FFDHESSG
   end interface
 
   real :: Scaling(n)
@@ -62,14 +88,24 @@ subroutine minimize(x0,fn,grad,hessian)
 
   Scaling =1 
 
-  ! call initalize(n)
+  call initalize(n)
 
-  ! print *, n
-  ! print *, x0
-  ! print *, fn(x0)
-  ! print *, grad(x0)
-  ! print *, hessian(x0)
-  ! call exit(1)
+  print *, n
+  print *, x0
+  print 10, fn(x0)
+  print *, "grad"
+  print 10, grad(x0)
+  print *, "hess"
+  print 10, hessian(x0)
+
+  print *, "ffdgrad"
+  print 10, FFDGRAD(x0)
+  print *, "fdhessg"
+  print 10, FFDHESSG(x0)
+  print *, "FFDHESSF"
+  print 10, ffdhessf(x0)
+  
+  call exit(1)
   
 
   call UMSTOP0(x0,fn(x0),grad(x0),Scaling)
@@ -95,6 +131,7 @@ subroutine minimize(x0,fn,grad,hessian)
   print *, "reached max iterations",iterations
   print *, nextx,x
 
+10  format(4(g20.8))
   contains
     subroutine takestep()
 
@@ -110,6 +147,6 @@ subroutine minimize(x0,fn,grad,hessian)
       ! call backtrackinglinesearch(x,p,xstep,fn,grad)
     end subroutine takestep
 
-  
+
 end subroutine minimize
 
