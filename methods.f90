@@ -795,6 +795,8 @@ subroutine FDGRAD(x0,f0,fn,g)
   tempx = x0
   sqrteta = sqrt(macheps)
 
+  print *,"sqrteta", sqrteta
+
   do j=1,n
      stepsizej = sqrteta * tempx(j)
      tempj = tempx(j)
@@ -826,6 +828,10 @@ subroutine fdhessf(x0,f0,fn,H)
   real :: tempi,tempj,tempx(n)
   real :: fneighbor(n),fii,fij
 
+  H = 0
+
+  print *, "fn",fn(x0)
+  
   tempx = x0
   cuberteta = macheps**(1.0/3.0)
   do i =1,n
@@ -836,18 +842,21 @@ subroutine fdhessf(x0,f0,fn,H)
      fneighbor(i) = fn(tempx)
      tempx(i) = tempi
   end do
+  print *, stepsize
 
   do i =1,n
      tempi = tempx(i)
      tempx(i) = tempx(i) + 2*stepsize(i)
      fii = fn(tempx)
-     H(i,i) = f0-fneighbor(i) + (fij-fneighbor(i))/(stepsize(i)*stepsize(i))
+     H(i,i) = (f0-fneighbor(i) + (fii-fneighbor(i)))/(stepsize(i)*stepsize(i))
+     print *, (stepsize(i)*stepsize(i))
      tempx(i) = tempi + stepsize(i)
      do j =i+1,n
+        print *, i,j
         tempj = tempx(j)
         tempx(j) = tempx(j) + stepsize(j)
         fij = fn(tempx)
-        H(i,j) = f0-fneighbor(i) + (fij-fneighbor(j))/(stepsize(i)*stepsize(j))
+        H(i,j) = ((f0-fneighbor(i)) + (fij-fneighbor(j)))/(stepsize(i)*stepsize(j))
         tempx(j) = tempj
      end do
      tempx(i) = tempi
