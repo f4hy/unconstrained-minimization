@@ -150,6 +150,7 @@ subroutine UMSTOP(xplus,xc,func,grad,Sx)
      temp = abs(grad)
      if (maxval(temp) .le. gradtol) then
         print *, "gradient small, local minimum found"
+        print *, temp
         termcode = 1 
         return
      end if
@@ -346,7 +347,6 @@ subroutine modelhess(Sx,H,L)
   real :: sdd
   real :: maxoffl
 
-
   do i=1,n
      do j=i,n
         H(i,j) = H(i,j)/(Sx(i) * Sx(j))
@@ -456,15 +456,15 @@ contains
 end subroutine modelhess
 
 
-subroutine trustregionupdate(x,fc,grad,funct,L,step,delta,xprev,fprev,nextx,nextf,Hessian)
+subroutine trustregionupdate(x,fc,grad,funct,L,step,delta,xprev,fprev,nextx,nextf,hess)
   use optimization
   implicit none
   real, intent(in) :: x(n)
   real, intent(in) :: fc     !f(x)
   real, intent(in) :: grad(n)  
   real, intent(in) :: L(n,n)  
-  optional :: Hessian
-  real, intent(in) :: Hessian(n,n)    !Model hessian
+  ! optional :: hess
+  real, intent(in), optional :: hess(n,n)    !Model hessian
   real, intent(in) :: step(n)  
   real, intent(inout) :: delta
   real, intent(inout) :: xprev(n)
@@ -490,15 +490,13 @@ subroutine trustregionupdate(x,fc,grad,funct,L,step,delta,xprev,fprev,nextx,next
   maxtaken = .FALSE.
 
   
-  
   nextx = x+step
   nextf = funct(nextx)
   dF = nextf - fc
-  
+
   initslope = dot_product(grad,step)
 
   if (retcode .ne. 3) fprev = 0
-
   if (retcode .eq. 3 .and. nextf .ge. fprev .or. dF .gt. 1.0e-4 * initslope ) then
      nextx = xprev
      nextf = fprev
@@ -507,6 +505,8 @@ subroutine trustregionupdate(x,fc,grad,funct,L,step,delta,xprev,fprev,nextx,next
      return
   end if
 
+  
+
   if(df .ge. alpha * initslope) then
      ! f(nextx) too large
 
@@ -514,6 +514,8 @@ subroutine trustregionupdate(x,fc,grad,funct,L,step,delta,xprev,fprev,nextx,next
      if (rellength .lt. steptol) then
         !  nextx-x is too small
         retcode = 1
+        print *, "RET 1!"
+
         nextx = x
      else
         retcode = 2
@@ -528,11 +530,11 @@ subroutine trustregionupdate(x,fc,grad,funct,L,step,delta,xprev,fprev,nextx,next
      end if
   else
      dfpred = initslope
-     if (present(Hessian)) then  !hook step
+     if (present(hess) .AND. HOOK) then  !hook step
         do i = 1,n
-           temp = 0.5 * Hessian(i,i) * step(i)**2
+           temp = 0.5 * hess(i,i) * step(i)**2
            do j = i+1,n
-              temp = temp + Hessian(i,j) * step(i) * step(j)
+              temp = temp + hess(i,j) * step(i) * step(j)
            end do
            dfpred = dfpred + temp
         end do
@@ -545,13 +547,15 @@ subroutine trustregionupdate(x,fc,grad,funct,L,step,delta,xprev,fprev,nextx,next
         end do
      end if
      if (retcode .ne. 2 .and. abs(dfpred - df) .le. 0.1 * abs(df) .or. df .le. initslope &
-          & .and. .not. newttaken  .and. delta .le. .99 *maxstep) then
+          & .and. newttaken .eqv. .FALSE. .and. delta .le. .99 *maxstep) then
         retcode = 3
+        print *, "RET 3!"
         xprev = nextx
         fprev = nextf
         delta = min(2 * delta, maxstep)
      else
         retcode = 0
+        print *, "RET 0!"
         if (norm(step) .ge. 0.99 * maxstep) then
            maxtaken = .TRUE.
         else if(df .le. 0.75 * dfpred) then
@@ -586,14 +590,17 @@ subroutine dogstep(grad,L,Sn,newtlen,delta,firstdog,cauchylen,eta,shat,vhat,step
   real :: tempv
   real :: alpha,beta
   
+
   if (newtlen .lt. delta) then
      newttaken = .TRUE.
      step = Sn
      delta = newtlen
+     print *, "dogstep3",step
      return
   else
      newttaken = .FALSE.
      if (firstdog) then
+        print *, "FIRST DOGGED!"
         firstdog = .FALSE.
         alpha = norm(grad)**2
         beta = 0
@@ -614,9 +621,12 @@ subroutine dogstep(grad,L,Sn,newtlen,delta,firstdog,cauchylen,eta,shat,vhat,step
      end if
      if(eta * newtlen .lt. delta) then
         step = (delta/newtlen) * Sn
+        print *, "dogstep1",step
+  
         return
      else if (cauchylen .ge. delta) then
         step = (delta/ cauchylen) * shat
+        print *, "dogstep2",step
         return
      else
         temp = dot_product(vhat,shat)
@@ -626,6 +636,8 @@ subroutine dogstep(grad,L,Sn,newtlen,delta,firstdog,cauchylen,eta,shat,vhat,step
         
      end if
   end if
+
+
 end subroutine dogstep
 
 
@@ -635,7 +647,7 @@ subroutine dogdriver(x0,f0,grad,funct,L,Sn,delta,nextx,nextf)
   
   real, intent(in) :: x0(n)
   real, intent(in) :: f0
-  real, intent(in) :: grad(n,n)
+  real, intent(in) :: grad(n)
   
   interface
      real function funct(p)
@@ -663,13 +675,23 @@ subroutine dogdriver(x0,f0,grad,funct,L,Sn,delta,nextx,nextf)
   real :: xprev(n)
   real :: fprev
   real :: step(n)
+  real :: H(n,n)
+
+  integer :: count = 0
+
+  ! firstdog = .TRUE.
+
+  H = 1
 
   retcode = 4
 
   newtlen = norm(Sn)
   
+  count = 0
+
   do while(retcode .GT. 1)
-     call dogstep(grad,L,Sn,newtlen,delta,firstdog,cauchylen,eta,shat,vhat,step)
+     call dogstep(grad,L,Sn,newtlen,delta,firstdog,cauchylen,eta, &
+          & shat,vhat,step)
      call trustregionupdate(x0,f0,grad,funct,L,step,delta,xprev,fprev,nextx,nextf)
   end do
   
