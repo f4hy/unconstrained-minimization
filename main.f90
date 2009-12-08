@@ -7,33 +7,39 @@ subroutine minimize(x0,fn,grad,hessian)
 
   interface
      real function fn(p)
-       real, dimension(size(x0)) :: p
+       use size
+       real :: p(n)
      end function fn
      function grad(p) Result(del)
-       real, dimension(size(x0)) :: p
-       real, dimension(size(x0)) :: del
+       use size
+       real :: p(n)
+       real :: del(n)
      end function grad
      function hessian(p) result(hess)
-       real, dimension(size(x0),size(x0)) :: hess
-       real, dimension(size(x0))  :: p
+       use size
+       real:: hess(n,n)
+       real :: p(n)
      end function hessian
 
 
-     subroutine backtrackinglinesearch(x0,p,x,f,grad,hessian)
+     subroutine backtrackinglinesearch(x0,p,x,fn,grad,hessian)
        real :: p(:),x0(:)
        real :: x(:)
        optional :: hessian
        interface
-          real function f(p)
-            real, dimension(size(x0)) :: p
-          end function f
+          real function fn(p)
+            use size
+            real :: p(n)
+          end function fn
           function grad(p) Result(del)
-            real, dimension(size(x0)) :: p
-            real, dimension(size(x0)) :: del
+            use size
+            real :: p(n)
+            real :: del(n)
           end function grad
           function hessian(p) result(hess)
-            real, dimension(size(x0),size(x0)) :: hess
-            real, dimension(size(x0))  :: p
+            use size
+            real:: hess(n,n)
+            real :: p(n)
           end function hessian
        end interface
      end subroutine backtrackinglinesearch
@@ -47,6 +53,8 @@ subroutine minimize(x0,fn,grad,hessian)
   real :: Sn(n)
   real :: L(n,n)
   real :: delta=-1
+
+  logical :: dogleg = .TRUE.
 
   ! logical :: DONE = .FALSE.
 
@@ -89,13 +97,13 @@ subroutine minimize(x0,fn,grad,hessian)
   contains
     subroutine takestep()
 
-      if(.FALSE.) then
-         call backtrackinglinesearch(x,p,nextx,fn,grad,hessian)
-      end if
-      if(.TRUE.) then
+      if(dogleg) then
          call modelhess(Scaling,hessian(x),L)
          call cholsolve(grad(x),L,Sn)
          call dogdriver(x,fn(x),grad(x),fn,L,Sn,delta,nextx,nextf)
+      else
+         call backtrackinglinesearch(x,p,nextx,fn,grad,hessian)
+         ! call backtrackinglinesearch(x,p,nextx,fn,grad)
       end if
       ! call backtrackinglinesearch(x,p,xstep,fn,grad)
     end subroutine takestep

@@ -1,10 +1,9 @@
 module size
-  integer, parameter :: n = 2
+  integer, parameter :: n = 4
 end module size
 
 program rosen
-  integer, parameter :: n = 2
-  
+  use size
   real :: x0(n)
   interface
      real function rosenbock(p)
@@ -27,7 +26,11 @@ program rosen
   end interface
 
   print *, "start?"
-  x0 = [-1.2,1.0]
+ 
+  do i = 1,n/2
+     x0(2*i-1) = -1.2
+     x0(2*i) = 1.0
+  end do
   
   print *, rosenbock(x0)
   print *, grad(x0)
@@ -77,7 +80,7 @@ end function rosenbock
 function grad(p) Result(del)
   use size
   real :: p(n)
-  real :: del(1:2)
+  real :: del(n)
   real :: x1,x2
   integer :: i
 
@@ -94,8 +97,8 @@ end function grad
 
 function hessian(p) result(hess)
   use size
-  real :: hess(1:2,1:2)
-  real :: p(2)
+  real :: hess(n,n)
+  real :: p(n)
   real :: x1,x2
   integer :: one,two
 
@@ -112,7 +115,16 @@ function hessian(p) result(hess)
      hess(two,one) = -400*x1
      hess(two,two) = 200
 
+
   end do
+  ! x1 = p(1)
+  
+  ! x2 = p(2)
+  ! hess(1,1) = 2 + 800*x1**2 - 400*(-x1**2 + x2)
+  ! hess(1,2) = -400*x1
+  ! hess(2,1) = -400*x1
+  ! hess(2,2) = 200
+
 
 end function hessian
 

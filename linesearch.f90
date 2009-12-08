@@ -16,23 +16,28 @@ subroutine backtrackinglinesearch(x0,p,x,f,grad,hessian)
   optional :: hessian
   interface
      real function f(p)
-       real, dimension(size(x)) :: p
+       use size
+       real:: p(n)
      end function f
      function grad(p) Result(del)
-       real, dimension(size(x)) :: p
-       real, dimension(size(x)) :: del
+       use size
+       real :: p(n)
+       real :: del(n)
      end function grad
      function hessian(p) result(hess)
-       real, dimension(size(x),size(x)) :: hess
-       real, dimension(size(x))  :: p
+       use size
+       real :: hess(n,n)
+       real  :: p(n)
      end function hessian
      subroutine steepestdecent(grad,point,direction)
+       use size
        real :: point(:)
        real :: direction(:)
        interface
           function grad(p) Result(del)
-            real :: p(size(x))
-            real, dimension(size(x)) :: del
+            use size
+            real :: p(n)
+            real :: del(n)
           end function grad
        end interface
      end subroutine steepestdecent
@@ -41,12 +46,14 @@ subroutine backtrackinglinesearch(x0,p,x,f,grad,hessian)
        real :: direction(:)
        interface
           function grad(p) Result(del)
-            real, dimension(1:size(x)) :: p
-            real, dimension(1:size(x)) :: del
+            use size
+            real :: p(n)
+            real :: del(n)
           end function grad
           function hessian(p) result(hess)
-            real, dimension(size(x),size(x)) :: hess
-            real, dimension(size(x))  :: p
+            use size
+            real :: hess(n,n)
+            real  :: p(n)
           end function hessian
        end interface
      end subroutine newtondirection
@@ -65,6 +72,7 @@ subroutine backtrackinglinesearch(x0,p,x,f,grad,hessian)
   a = 1.0e0
   
   if(present(hessian))  then
+     print *, "newtoning"
      call newtondirection(grad,hessian,x,p)
   else
      call steepestdecent(grad,x,p)
@@ -92,8 +100,9 @@ subroutine steepestdecent(grad,point,direction)
   real, dimension(size(point)) :: g
   interface
      function grad(p) Result(del)
-       real, dimension(1:size(point)) :: p
-       real, dimension(1:size(point)) :: del
+       use size
+       real :: p(n)
+       real :: del(n)
      end function grad
   end interface
   g = grad(point)
@@ -111,12 +120,14 @@ subroutine newtondirection(grad,hessian,point,direction)
   real :: D
   interface
      function grad(p) Result(del)
-       real, dimension(size(point)) :: p
-       real, dimension(size(point)) :: del
+       use size
+       real :: p(n)
+       real :: del(n)
      end function grad
      function hessian(p) result(hess)
-       real, dimension(size(point),size(point)) :: hess
-       real, dimension(size(point))  :: p
+       use size
+       real :: hess(n,n)
+       real :: p(n)
      end function hessian
   end interface
   real, dimension(size(point)) :: g
@@ -124,7 +135,7 @@ subroutine newtondirection(grad,hessian,point,direction)
   real :: info
   D = size(point)
   g= -grad(point)
-  call SGESV( size(point), 1, hessian(point), size(point), ipv, g, size(point), info )
+  call DGESV( size(point), 1, hessian(point), size(point), ipv, g, size(point), info )
   direction = g
   
 end subroutine newtondirection

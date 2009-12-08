@@ -33,7 +33,7 @@ module optimization
   real :: globtol = 1.0e-8
 
   integer, parameter :: linsearch = 1
-  integer, parameter :: maxiterations = 100
+  integer, parameter :: maxiterations = 10000
   
 
   contains
@@ -41,7 +41,7 @@ module optimization
       real :: v(:)
       norm = sqrt(sum(v*v))
     end function norm
-    real function computemacheps()
+    subroutine computemacheps()
       ! Determine the smallest possible real epsilon that makes an
       ! additive change for the given precision
       implicit none
@@ -51,7 +51,7 @@ module optimization
       end do
       macheps = macheps * 2.0e0
       return 
-    end function computemacheps
+    end subroutine computemacheps
 
 end module optimization
 
@@ -64,7 +64,7 @@ subroutine initalize(num)
      return
   end if
 
-  macheps = computemacheps()
+  call computemacheps()
   
 end subroutine INITALIZE
 
@@ -84,7 +84,7 @@ subroutine UMINICK(num)
      call exit
   end if
 
-  macheps = computemacheps()
+  ! macheps = computemacheps()
 
   
 
@@ -472,7 +472,8 @@ subroutine trustregionupdate(x,fc,grad,funct,L,step,delta,xprev,fprev,nextx,next
 
   interface
      real function funct(p)
-       real, dimension(size(x)) :: p
+       use size
+       real :: p(n)
      end function funct
   end interface
   
@@ -651,7 +652,8 @@ subroutine dogdriver(x0,f0,grad,funct,L,Sn,delta,nextx,nextf)
   
   interface
      real function funct(p)
-       real, dimension(size(x0)) :: p
+       use size
+       real :: p(n)
      end function funct
   end interface
 
