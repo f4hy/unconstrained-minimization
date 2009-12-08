@@ -772,5 +772,84 @@ subroutine FDHESSG(x0,g0,grad,H)
   end do
 end subroutine FDHESSG
   
+subroutine FDGRAD(x0,f0,fn,g)
+  use optimization
+  implicit none
   
+  real, intent(in) :: x0(n)
+  real, intent(in) :: f0
+  interface
+     real function fn(p)
+       use size
+       real :: p(n)
+     end function fn
+  end interface
+  real, intent(out) :: g(n)
   
+  real :: sqrteta
+  real :: stepsizej
+  real :: tempj
+  real :: tempx(n)
+  integer :: i,j
+
+  tempx = x0
+  sqrteta = sqrt(macheps)
+
+  do j=1,n
+     stepsizej = sqrteta * tempx(j)
+     tempj = tempx(j)
+     tempx(j) = tempx(j) + stepsizej
+     stepsizej = tempx(j) - tempj
+     g(j) = ( fn(tempx)-f0)/stepsizej
+     tempx(j) = tempj
+  end do
+end subroutine FDGRAD
+  
+subroutine fdhessf(x0,f0,fn,H)
+  use optimization
+  implicit none
+  
+  real, intent(in) :: x0(n)
+  real, intent(in) :: f0
+  interface
+     real function fn(p)
+       use size
+       real :: p(n)
+     end function fn
+  end interface
+  
+  real, intent(out) :: H(n,n)
+  
+  real :: cuberteta
+  integer :: i,j
+  real :: stepsize(n)
+  real :: tempi,tempj,tempx(n)
+  real :: fneighbor(n),fii,fij
+
+  tempx = x0
+  cuberteta = macheps**(1.0/3.0)
+  do i =1,n
+     stepsize(i) = cuberteta*tempx(i)
+     tempi = tempx(i)
+     tempx(i) = tempx(i) + stepsize(i)
+     stepsize(i) = tempx(i) - tempi
+     fneighbor(i) = fn(tempx)
+     tempx(i) = tempi
+  end do
+
+  do i =1,n
+     tempi = tempx(i)
+     tempx(i) = tempx(i) + 2*stepsize(i)
+     fii = fn(tempx)
+     H(i,i) = f0-fneighbor(i) + (fij-fneighbor(i))/(stepsize(i)*stepsize(i))
+     tempx(i) = tempi + stepsize(i)
+     do j =i+1,n
+        tempj = tempx(j)
+        tempx(j) = tempx(j) + stepsize(j)
+        fij = fn(tempx)
+        H(i,j) = f0-fneighbor(i) + (fij-fneighbor(j))/(stepsize(i)*stepsize(j))
+        tempx(j) = tempj
+     end do
+     tempx(i) = tempi
+  end do
+end subroutine fdhessf
