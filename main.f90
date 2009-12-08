@@ -53,6 +53,7 @@ subroutine minimize(x0,fn,grad,hessian)
   real :: Sn(n)
   real :: L(n,n)
   real :: delta=-1
+  real :: temphess(n,n)
 
   logical :: dogleg = .TRUE.
 
@@ -83,7 +84,7 @@ subroutine minimize(x0,fn,grad,hessian)
      
      call takestep()
 
-     call UMSTOP(nextx,x,fn(nextx),grad(nextx),Scaling)
+     call UMSTOP(nextx,x,grad(nextx),Scaling)
      x = nextx
      if(termcode .gt. 0) then
         print *, "terminating with code",termcode
@@ -98,7 +99,8 @@ subroutine minimize(x0,fn,grad,hessian)
     subroutine takestep()
 
       if(dogleg) then
-         call modelhess(Scaling,hessian(x),L)
+         temphess = hessian(x)
+         call modelhess(Scaling,temphess,L)
          call cholsolve(grad(x),L,Sn)
          call dogdriver(x,fn(x),grad(x),fn,L,Sn,delta,nextx,nextf)
       else

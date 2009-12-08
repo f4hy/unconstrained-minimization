@@ -11,7 +11,6 @@ intelflags	= -CB -r8 -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_c
 
 openmp	= -fopenmp
 
-intel: rosen.intel.exe
 
 rosen: rosen.exe rosen.intel.exe
 

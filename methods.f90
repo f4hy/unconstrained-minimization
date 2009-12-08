@@ -121,7 +121,7 @@ subroutine UMSTOP0(x0,func,grad,Sx)
   termcode = 0
 end subroutine UMSTOP0
 
-subroutine UMSTOP(xplus,xc,func,grad,Sx)
+subroutine UMSTOP(xplus,xc,grad,Sx)
   ! Decide weather to terminate after iteraction zero because x0 is
   ! too close to a critical point
 
@@ -130,7 +130,6 @@ subroutine UMSTOP(xplus,xc,func,grad,Sx)
   implicit none
   real, intent(in) :: xplus(n)
   real, intent(in) :: xc(n)
-  real, intent(in) :: func
   real, intent(in) :: grad(n)
   real, intent(in) :: Sx(n)
   real :: temp(n) 

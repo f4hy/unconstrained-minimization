@@ -5,6 +5,7 @@ end module size
 program rosen
   use size
   real :: x0(n)
+  integer :: i
   interface
      real function rosenbock(p)
        use size
@@ -24,6 +25,7 @@ program rosen
 
 
   end interface
+
 
   print *, "start?"
  
@@ -101,6 +103,7 @@ function hessian(p) result(hess)
   real :: p(n)
   real :: x1,x2
   integer :: one,two
+  integer :: i
 
   hess = 0
 
