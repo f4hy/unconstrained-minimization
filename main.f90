@@ -38,14 +38,13 @@ subroutine minimize(x0,fn,grad,hessian)
           end function grad
           function hessian(p) result(hess)
             use size
-            real:: hess(n,n)
             real :: p(n)
+            real:: hess(n,n)
           end function hessian
        end interface
      end subroutine backtrackinglinesearch
      function ffdhessf(x0) result(H)
        use optimization
-       use analytics
        implicit none
        
        real, intent(in) :: x0(n)
@@ -81,31 +80,28 @@ subroutine minimize(x0,fn,grad,hessian)
   real :: delta=-1
   real :: temphess(n,n)
 
-  logical :: dogleg = .TRUE.
-
-  ! logical :: DONE = .FALSE.
 
 
   Scaling =1 
 
   call initalize(n)
 
-  print *, n
-  print *, x0
-  print 10, fn(x0)
-  print *, "grad"
-  print 10, grad(x0)
-  print *, "hess"
-  print 10, hessian(x0)
+  ! print *, n
+  ! print *, x0
+  ! print 10, fn(x0)
+  ! print *, "grad"
+  ! print 10, grad(x0)
+  ! print *, "hess"
+  ! print 10, hessian(x0)
 
-  print *, "ffdgrad"
-  print 10, FFDGRAD(x0)
-  print *, "fdhessg"
-  print 10, FFDHESSG(x0)
-  print *, "FFDHESSF"
-  print 10, ffdhessf(x0)
+  ! print *, "ffdgrad"
+  ! print 10, FFDGRAD(x0)
+  ! print *, "fdhessg"
+  ! print 10, FFDHESSG(x0)
+  ! print *, "FFDHESSF"
+  ! print 10, ffdhessf(x0)
   
-  call exit(1)
+  ! call exit(1)
   
 
   call UMSTOP0(x0,fn(x0),grad(x0),Scaling)
@@ -135,16 +131,53 @@ subroutine minimize(x0,fn,grad,hessian)
   contains
     subroutine takestep()
 
-      if(dogleg) then
-         temphess = hessian(x)
-         call modelhess(Scaling,temphess,L)
-         call cholsolve(grad(x),L,Sn)
-         call dogdriver(x,fn(x),grad(x),fn,L,Sn,delta,nextx,nextf)
+      if(nohessian) then
+         if(analyticgrad) then
+            print *, "lineseach stepest decent"
+            call backtrackinglinesearch(x,p,nextx,fn,grad)
+            return
+         else
+            print *, "lineseach stepest decent fake grad"
+            call backtrackinglinesearch(x,p,nextx,fn,ffdgrad)
+         end if
+      else if(linesearch) then
+         if(analytichessian) then
+            print *, "lineseach newton"
+            call backtrackinglinesearch(x,p,nextx,fn,grad,hessian)
+         else if (analyticgrad) then
+            print *, "lineseach newton fake hess"
+            call backtrackinglinesearch(x,p,nextx,fn,grad,ffdhessg)
+         else
+            print *, "lineseach newton fake grad+hess"
+            call backtrackinglinesearch(x,p,nextx,fn,ffdgrad,ffdhessf)
+         end if
+         
+      else if (dogleg) then
+         
+         if(analytichessian) then
+            print *, "dog leg"
+            temphess = hessian(x)
+            call modelhess(Scaling,temphess,L)
+            call cholsolve(grad(x),L,Sn)
+            call dogdriver(x,fn(x),grad(x),fn,L,Sn,delta,nextx,nextf)
+         else if(analyticgrad) then
+            print *, "dog leg fake hess"
+            temphess = ffdhessg(x)
+            call modelhess(Scaling,temphess,L)
+            call cholsolve(grad(x),L,Sn)
+            call dogdriver(x,fn(x),grad(x),fn,L,Sn,delta,nextx,nextf)
+         else if(analyticgrad) then
+            print *, "dog leg fake grad+hess"
+            temphess = ffdhessf(x)
+            call modelhess(Scaling,temphess,L)
+            call cholsolve(ffdgrad(x),L,Sn)
+            call dogdriver(x,fn(x),ffdgrad(x),fn,L,Sn,delta,nextx,nextf)
+         end if
       else
-         call backtrackinglinesearch(x,p,nextx,fn,grad,hessian)
-         ! call backtrackinglinesearch(x,p,nextx,fn,grad)
+         print *, "ERROR: NO METHOD SELECTED!"
+         call exit(1)
       end if
-      ! call backtrackinglinesearch(x,p,xstep,fn,grad)
+      ! Newton
     end subroutine takestep
 
 

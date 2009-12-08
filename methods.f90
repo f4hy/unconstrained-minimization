@@ -12,8 +12,9 @@
 
 
 module optimization
+  use size
   implicit none
-  integer :: n
+  ! integer :: n
   real :: typf = 1
   real :: gradtol = 0
   integer ::termcode
@@ -32,11 +33,11 @@ module optimization
 
   real :: globtol = 1.0e-8
 
-  integer, parameter :: analytic = 0
-  integer, parameter :: fullfd = 1
-  integer, parameter :: fdhessf = 2
-  integer, parameter :: fdhessg = 2
-  integer :: selection
+  logical :: nohessian = .FALSE.
+  logical :: linesearch = .FALSE.
+  logical :: dogleg = .FALSE.
+  logical :: analyticgrad = .TRUE.
+  logical :: analytichessian = .TRUE.
 
   integer, parameter :: linsearch = 1
   integer, parameter :: maxiterations = 10000
@@ -64,7 +65,7 @@ end module optimization
 subroutine initalize(num)
   use optimization
   integer, intent(in) :: num
-  n = num
+  ! n = num
   if (n.lt. 1) then
      termcode = -1
      return
@@ -77,26 +78,6 @@ subroutine initalize(num)
 end subroutine INITALIZE
 
 
-subroutine UMINICK(num)
-  use optimization
-  integer, intent(in) :: num
-  ! real, intent(in) :: x0(n)
-
-  n = num
-  ! NOT FINISHED THIS IS JUST FOR SANITY WHILE TESTING
-  
-
-
-  if (n.lt. 1) then
-     print *, "N must be at least one"
-     call exit
-  end if
-
-  ! macheps = computemacheps()
-
-  
-
-end subroutine UMINICK
 
 
 
