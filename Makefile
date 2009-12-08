@@ -8,7 +8,7 @@ flags		= -llapack -ffixed-line-length-132 -fbounds-check -W -Wall -Wextra -fdefa
 openmp	= -fopenmp
 
 
-rosen: rosen.exe
+rosen:  erosen.exe rosen.exe
 
 tests:	 runtests.exe
 
@@ -18,6 +18,9 @@ runtests.exe: testmethods.f90 methods.f90
 
 rosen.exe: rosen.f90  main.f90 methods.f90  linesearch.f90
 	${compiler} ${flags} -o rosen.exe rosen.f90 methods.f90 main.f90  linesearch.f90
+
+erosen.exe: erosen.f90  main.f90 methods.f90  linesearch.f90
+	${compiler} ${flags} -o erosen.exe erosen.f90 methods.f90 main.f90  linesearch.f90
 
 clean:
 	-rm *.exe

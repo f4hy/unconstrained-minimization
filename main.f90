@@ -53,7 +53,15 @@ subroutine minimize(x0,fn,grad,hessian)
 
   Scaling =1 
 
-  call initalize(n)
+  ! call initalize(n)
+
+  ! print *, n
+  ! print *, x0
+  ! print *, fn(x0)
+  ! print *, grad(x0)
+  ! print *, hessian(x0)
+  ! call exit(1)
+  
 
   call UMSTOP0(x0,fn(x0),grad(x0),Scaling)
 

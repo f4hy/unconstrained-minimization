@@ -36,6 +36,9 @@ program rosen
   end interface
 
   x0 = [-1.2,1.0]
+
+  print *, rosenbock(x0)
+  print *, grad(x0)
   
   call initalize(2)
 
@@ -56,7 +59,7 @@ real function rosenbock(p)
   real :: x1,x2
   x1 = p(1)
   x2 = p(2)
-  rosenbock = 10*(x2-x1**2)**2+(1-x1)**2
+  rosenbock = 100*(x2-x1**2)**2+(1-x1)**2
 end function rosenbock
 
 
@@ -65,8 +68,8 @@ function grad(p) Result(del)
   real :: del(1:2)
   x1 = p(1)
   x2 = p(2)
-  del(1) = -40*x1*((x2-x1**2))+2*x1-2.0
-  del(2) = 20*(x2-x1**2)
+  del(1) = -400*x1*((x2-x1**2))+2*x1-2.0
+  del(2) = 200*(x2-x1**2)
 end function grad
 
 function hessian(p) result(hess)
@@ -75,9 +78,9 @@ function hessian(p) result(hess)
   real :: x1,x2
   x1 = p(1)
   x2 = p(2)
-  hess(1,1) = 2 + 80*x1**2 - 40*(-x1**2 + x2)
-  hess(1,2) = -40*x1
-  hess(2,1) = -40*x1
-  hess(2,2) = 20
+  hess(1,1) = 2 + 800*x1**2 - 400*(-x1**2 + x2)
+  hess(1,2) = -400*x1
+  hess(2,1) = -400*x1
+  hess(2,2) = 200
 end function hessian
 
