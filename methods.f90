@@ -702,3 +702,46 @@ subroutine dogdriver(x0,f0,grad,funct,L,Sn,delta,nextx,nextf)
   end do
   
 end subroutine dogdriver
+
+
+subroutine FDJAC(x0,f0,grad,eta,Jacob)
+  use optimization
+  implicit none
+  
+  real, intent(in) :: x0(n)
+  real, intent(in) :: f0(n)
+  interface
+     function grad(p) Result(del)
+       use size
+       real :: p(n)
+       real :: del(n)
+     end function grad
+  end interface
+  real, intent(in) :: eta
+  real, intent(out) :: Jacob(n,n)
+
+  real :: sqrteta
+  real :: tempj
+  real :: stepsizej
+  real :: xtemp(n)
+  real :: tempgrad(n)
+  integer :: i,j
+
+  xtemp = x0
+
+  sqrteta = sqrt(eta)
+  
+  do j =1, n
+     stepsizej = sqrteta * xtemp(j)
+     tempj = xtemp(j)
+     xtemp(j) = xtemp(j) + stepsizej
+     stepsizej = xtemp(j) - tempj
+     tempgrad = grad(xtemp)
+     do i=1,n
+        Jacob(i,j) = (tempgrad(i) - f0(i)) /stepsizej
+     end do
+     xtemp(j) = tempj
+  end do
+
+end subroutine FDJAC
+
