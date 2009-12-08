@@ -62,10 +62,11 @@ module optimization
 
 end module optimization
 
-subroutine initalize(num)
+subroutine initalize()
   use optimization
-  integer, intent(in) :: num
-  ! n = num
+
+  integer :: input =0
+
   if (n.lt. 1) then
      termcode = -1
      return
@@ -73,7 +74,55 @@ subroutine initalize(num)
 
   call computemacheps()
   
-  selection = analytic
+  do while(input .lt. 1 .or.  input .gt. 5)
+     print *, "Which analytics would you like to use?"
+     print *, "1. All analytic"
+     print *, "2. Only analytic gradient"
+     print *, "3. No analytic hessian or gradient"
+     print *, "4. Analytic gradient NO HESSIAN AT ALL"
+     print *, "5. no analytic gradient and NO HESSIAN AT ALL!"
+     read(5,*) input
+     print *, "input",input
+  end do
+
+  if(input .eq. 1) then
+     analyticgrad = .TRUE.
+     analytichessian = .TRUE.
+  else if(input .eq. 2) then
+     analyticgrad = .TRUE.
+     analytichessian = .FALSE.
+  else if(input .eq. 3) then
+     analyticgrad = .FALSE.
+     analytichessian = .FALSE.
+  else if(input .eq. 4) then
+     analyticgrad = .TRUE.
+     analytichessian = .FALSE.
+     nohessian = .TRUE.
+  else if(input .eq. 5) then
+     analyticgrad = .FALSE.
+     analytichessian = .FALSE.
+     nohessian = .TRUE.
+  end if
+  
+  input = 0
+  if(nohessian) input = 2
+
+
+  do while(input .ne. 1 .AND.  input.ne. 2)
+     print *, "Select a method"
+     print *, "1. Dogleg"
+     print *, "2. linesearch"
+     read(5,*) input
+     print *, "input",input
+  end do
+
+  if(input .eq. 1) then
+     dogleg = .TRUE.
+  else
+     linesearch = .TRUE.
+  end if
+
+  input = 0
 
 end subroutine INITALIZE
 

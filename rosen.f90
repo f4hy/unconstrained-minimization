@@ -122,8 +122,6 @@ program rosen
   print *, fn(x0)
   print *, grad(x0)
 
-  call initalize(n)
-
   call minimize(x0,fn,grad,hessian)
 
   !  print *, "Newton"

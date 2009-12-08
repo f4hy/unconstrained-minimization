@@ -84,7 +84,7 @@ subroutine minimize(x0,fn,grad,hessian)
 
   Scaling =1 
 
-  call initalize(n)
+  call initalize()
 
   ! print *, n
   ! print *, x0
