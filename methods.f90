@@ -687,6 +687,8 @@ subroutine dogdriver(x0,f0,grad,funct,L,Sn,delta,nextx,nextf)
 
   ! firstdog = .TRUE.
 
+  eta = macheps
+
   H = 1
 
   retcode = 4
@@ -704,7 +706,7 @@ subroutine dogdriver(x0,f0,grad,funct,L,Sn,delta,nextx,nextf)
 end subroutine dogdriver
 
 
-subroutine FDJAC(x0,f0,grad,eta,Jacob)
+subroutine FDJAC(x0,f0,grad,Jacob)
   use optimization
   implicit none
   
@@ -717,7 +719,6 @@ subroutine FDJAC(x0,f0,grad,eta,Jacob)
        real :: del(n)
      end function grad
   end interface
-  real, intent(in) :: eta
   real, intent(out) :: Jacob(n,n)
 
   real :: sqrteta
@@ -729,7 +730,7 @@ subroutine FDJAC(x0,f0,grad,eta,Jacob)
 
   xtemp = x0
 
-  sqrteta = sqrt(eta)
+  sqrteta = sqrt(macheps)
   
   do j =1, n
      stepsizej = sqrteta * xtemp(j)
@@ -745,3 +746,31 @@ subroutine FDJAC(x0,f0,grad,eta,Jacob)
 
 end subroutine FDJAC
 
+subroutine FDHESSG(x0,g0,grad,H)
+  use optimization
+  implicit none
+  
+  real, intent(in) :: x0(n)
+  real, intent(in) :: g0(n)
+  interface
+     function grad(p) Result(del)
+       use size
+       real :: p(n)
+       real :: del(n)
+     end function grad
+  end interface
+  
+  real, intent(out) :: H(n,n)
+
+  integer :: i,j
+
+  call FDJAC(x0,g0,grad,H)
+  do i =1,n-1
+     do j =i+1,n
+        H(i,j) = (H(i,j)+H(j,i))/2
+     end do
+  end do
+end subroutine FDHESSG
+  
+  
+  
