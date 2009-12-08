@@ -558,6 +558,11 @@ subroutine trustregionupdate(x,fc,grad,funct,L,step,delta,xprev,fprev,nextx,next
         print *, "RET 0!"
         if (norm(step) .ge. 0.99 * maxstep) then
            maxtaken = .TRUE.
+        end if
+        if (df .ge. 0.1 * dfpred ) then
+           print *, "oops"
+           delta = delta/2
+           
         else if(df .le. 0.75 * dfpred) then
            delta = min(2*delta,maxstep)
         end if
