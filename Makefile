@@ -11,9 +11,12 @@ flags	= -CB -r8 -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -
 
 openmp	= -fopenmp
 
-powell: powell.exe
+all: rosen.exe powell.exe
 
 rosen: rosen.exe
+
+powell: powell.exe
+
 
 tests:	 runtests.exe
 
