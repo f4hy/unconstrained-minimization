@@ -124,9 +124,8 @@ subroutine minimize(x0,fn,grad,hessian)
      end if
   end do
 
-  print *, "reached max iterations",iterations
-  print *, nextx,x
-
+  print *, "stopped after iterations",iterations
+  print *, x
 10  format(4(g20.8))
   contains
     subroutine takestep()

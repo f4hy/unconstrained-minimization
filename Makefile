@@ -11,9 +11,11 @@ flags	= -CB -r8 -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -
 
 openmp	= -fopenmp
 
-all: rosen.exe powell.exe
+all: rosen.exe powell.exe wood.exe
 
 rosen: rosen.exe
+
+wood: wood.exe
 
 powell: powell.exe
 
@@ -29,6 +31,9 @@ rosen.exe: rosen.f90  main.f90 methods.f90  linesearch.f90
 
 powell.exe: powell.f90  main.f90 methods.f90  linesearch.f90
 	${compiler} ${flags} -o powell.exe powell.f90 methods.f90 main.f90  linesearch.f90
+
+wood.exe: wood.f90  main.f90 methods.f90  linesearch.f90
+	${compiler} ${flags} -o wood.exe wood.f90 methods.f90 main.f90  linesearch.f90
 
 # rosen.intel.exe: rosen.f90  main.f90 methods.f90  linesearch.f90
 # 	${compiler} ${flags} -o rosen.intel.exe rosen.f90 methods.f90 main.f90  linesearch.f90
