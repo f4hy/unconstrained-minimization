@@ -42,8 +42,11 @@ subroutine minimize(x0,fn,grad,hessian)
   real :: Scaling(n)
   real :: x(n)
   real :: p(n)
-  real :: xstep(n)
-  
+  real :: nextx(n)
+  real :: nextf
+  real :: Sn(n)
+  real :: L(n,n)
+  real :: delta=-1
 
   ! logical :: DONE = .FALSE.
 
@@ -61,22 +64,31 @@ subroutine minimize(x0,fn,grad,hessian)
   ! call UMSTOP0(x0,fn(x0),grad(x0),Sx,consecmax)
 
   do iterations=0,maxiterations
+     
      call takestep()
 
-     call UMSTOP(xstep,x,fn(xstep),grad(xstep),Scaling)
-     x = xstep
+     call UMSTOP(nextx,x,fn(nextx),grad(nextx),Scaling)
+     x = nextx
      if(termcode .gt. 0) then
         print *, "terminating with code",termcode
         exit
      end if
   end do
 
-  print *, "reached max iterations"
+  print *, "reached max iterations",iterations
+  print *, nextx,x
 
   contains
     subroutine takestep()
 
-      call backtrackinglinesearch(x,p,xstep,fn,grad,hessian)
+      if(.FALSE.) then
+         call backtrackinglinesearch(x,p,nextx,fn,grad,hessian)
+      end if
+      if(.TRUE.) then
+         call modelhess(Scaling,hessian(x),L)
+         call cholsolve(grad(x),L,Sn)
+         call dogdriver(x,fn(x),grad(x),fn,L,Sn,delta,nextx,nextf)
+      end if
       ! call backtrackinglinesearch(x,p,xstep,fn,grad)
     end subroutine takestep
 
