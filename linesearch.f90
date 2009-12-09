@@ -115,6 +115,7 @@ subroutine steepestdecent(grad,point,direction)
 end subroutine steepestdecent
 
 subroutine newtondirection(grad,hessian,point,direction)
+  use size
   real, intent(in) :: point(:)
   real, intent(out) :: direction(:)
   real :: D
@@ -130,12 +131,26 @@ subroutine newtondirection(grad,hessian,point,direction)
        real :: p(n)
      end function hessian
   end interface
-  real, dimension(size(point)) :: g
-  real :: ipv(size(point))
+  real :: g(n)
+  real :: ipv(n)
   real :: info
-  D = size(point)
+  real :: H(n,n)
+
   g= -grad(point)
-  call DGESV( size(point), 1, hessian(point), size(point), ipv, g, size(point), info )
+  H = hessian(point)
+
+  if(H(2,1) .eq. 0.0) then
+     do i=1,n
+        do j=i+1,n
+           H(j,i) = H(i,j)
+        end do
+     end do
+  end if
+!   print *, H
+! 10 format(4(g20.8))
+!   call exit(1)
+
+  call DGESV( n , 1, hessian(point), n, ipv, g, n, info )
   direction = g
   
 end subroutine newtondirection
