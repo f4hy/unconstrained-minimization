@@ -7,7 +7,7 @@
 # flags		= -llapack -ffixed-line-length-132 -fbounds-check -W -Wall -Wextra -fdefault-real-8
 
 compiler		= ifort
-flags	= -CB -r16 -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread
+flags	= -CB -r8 -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread
 
 openmp	= -fopenmp
 

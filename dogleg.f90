@@ -102,7 +102,7 @@ subroutine dogstep(grad,L,Sn,newtlen,maxstep,delta,firstdog,cauchylen,eta,ssd,v,
 10   format(4(g20.8))
 
      firstdog = .FALSE.
-     alpha = norm(grad)
+     alpha = norm(grad)**2
      print *, "alpha",alpha
      print 10, "grad",grad
      print *, "L"

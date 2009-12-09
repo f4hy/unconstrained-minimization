@@ -45,7 +45,8 @@ module optimization
   contains
     real function norm(v) 
       real :: v(:)
-      norm = sqrt(sum(v*v))
+      norm = sqrt(dot_product(v,v))
+      ! norm = sqrt(sum(v*v))
     end function norm
     subroutine computemacheps()
       ! Determine the smallest possible real epsilon that makes an
@@ -81,7 +82,7 @@ subroutine initalize()
   
   print *, "Machine precision set down to", macheps
 
-  steptol = macheps*2.0
+  steptol = macheps*10
 
   do while(input .lt. 1 .or.  input .gt. 5)
      print *, "Which analytics would you like to use?"
