@@ -113,23 +113,19 @@ subroutine minimize(x0,fn,grad,hessian)
 
   x = x0
 
-
-
-  ! call UMSTOP0(x0,fn(x0),grad(x0),Sx,consecmax)
-
   do iterations=0,maxiterations
 
      call takestep()
      call UMSTOP(nextx,x,fn(x),grad(nextx),Scaling)
      x = nextx
      if(termcode .gt. 0) then
-        print *, "terminating with code",termcode
+        ! print *, "terminating with code",termcode
         exit
      end if
   end do
 
   print *, "stopped after iterations",iterations
-  print *, x
+  print 10, "final point",x
 10 format(4(g20.8))
 contains
   subroutine takestep()
@@ -139,37 +135,37 @@ contains
 
     if(nohessian) then
        if(analyticgrad) then
-          print *, "lineseach stepest decent"
+          ! print *, "lineseach stepest decent"
           call backtrackinglinesearch(x,p,nextx,fn,grad)
           return
        else
-          print *, "lineseach stepest decent fake grad"
+          ! print *, "lineseach stepest decent fake grad"
           call backtrackinglinesearch(x,p,nextx,fn,ffdgrad)
        end if
     else if(linesearch) then
        if(analytichessian) then
-          print *, "lineseach newton"
+          ! print *, "lineseach newton"
           call backtrackinglinesearch(x,p,nextx,fn,grad,hessian)
        else if (analyticgrad) then
-          print *, "lineseach newton fake hess"
+          ! print *, "lineseach newton fake hess"
           call backtrackinglinesearch(x,p,nextx,fn,grad,ffdhessg)
        else
-          print *, "lineseach newton fake grad+hess"
+          ! print *, "lineseach newton fake grad+hess"
           call backtrackinglinesearch(x,p,nextx,fn,ffdgrad,ffdhessf)
        end if
 
     else if (dogleg) then
        fc = fn(x)
        if(analytichessian) then
-          print *, "dog leg"
+          ! print *, "dog leg"
           temphess = hessian(x)
           gc = grad(x)
        else if(analyticgrad) then
-          print *, "dog leg fake hess"
+          ! print *, "dog leg fake hess"
           temphess = ffdhessg(x)
           gc = grad(x)
        else 
-          print *, "dog leg fake grad+hess"
+          ! print *, "dog leg fake grad+hess"
           temphess = ffdhessf(x)
           gc = ffdgrad(x)
        end if

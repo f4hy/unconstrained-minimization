@@ -72,7 +72,6 @@ subroutine backtrackinglinesearch(x0,p,x,f,grad,hessian)
   a = 1.0e0
   
   if(present(hessian))  then
-     print *, "newtoning"
      call newtondirection(grad,hessian,x,p)
   else
      call steepestdecent(grad,x,p)

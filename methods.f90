@@ -218,7 +218,8 @@ subroutine UMSTOP(xplus,xc,func,grad,Sx)
   
   if (retcode .EQ. 1) then 
      termcode = 3
-     print *, "Terminating because method failed"
+     print *, "Terminating because method could not find a better point"
+     print *, "Maybe at minimum."
      return
   else
      
@@ -228,8 +229,7 @@ subroutine UMSTOP(xplus,xc,func,grad,Sx)
      do i=1,n
         temp(i) = max(abs(grad(i)),  max(abs(xplus(i)),1.0) / max(abs(func),typf))
      end do
-     print *, "temp",temp
-     ! temp = abs(grad)
+
      if (maxval(temp) .le. gradtol) then
         print *, "gradient small, local minimum found"
         print *, temp
