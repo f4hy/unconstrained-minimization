@@ -7,11 +7,11 @@
 # flags		= -llapack -ffixed-line-length-132 -fbounds-check -W -Wall -Wextra -fdefault-real-8
 
 compiler		= ifort
-flags	= -CB -r8 -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread
+flags	= -CB -r16 -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread
 
 openmp	= -fopenmp
 
-main = methods.f90 main.f90 linesearch.f90 dogleg.f90
+main = methods.f90 main.f90 linesearch.f90 dogleg.f90 finite.f90
 
 all: rosen.exe powell.exe wood.exe
 
