@@ -529,7 +529,7 @@ subroutine FDJAC(x0,f0,grad,Jacob)
   sqrteta = sqrt(macheps)
   
   do j =1, n
-     stepsizej = sqrteta * xtemp(j)
+     stepsizej = sqrteta * sign(max(abs(xtemp(j)),1.0),xtemp(j))
      tempj = xtemp(j)
      xtemp(j) = xtemp(j) + stepsizej
      stepsizej = xtemp(j) - tempj
