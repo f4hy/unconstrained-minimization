@@ -73,14 +73,14 @@ contains
        x4 = p(for)
 
        hess(one,one) = 2+120*(x1-x4)**2
-       hess(one,two) = 20
-       hess(one,thr) = 0
+       hess(one,two) = 20.0
+       hess(one,thr) = 0.0
        hess(one,for) = -120*(x1-x4)**2
 
-       hess(two,one) = 20
+       hess(two,one) = 20.0
        hess(two,two) = 200 - 12*(x2-2*x3)**2
        hess(two,thr) = -24*(x2-2*x3)**2
-       hess(two,for) = 0
+       hess(two,for) = 0.0
 
        hess(thr,one) = 0
        hess(thr,two) = -24*(x2-2*x3)**2

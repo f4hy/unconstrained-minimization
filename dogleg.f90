@@ -126,7 +126,7 @@ subroutine dogstep(grad,L,Sn,newtlen,maxstep,delta,firstdog,cauchylen,eta,ssd,v,
      print *, "Sn",Sn
      print *, "grad*Sn",abs(dot_product(grad,Sn))*beta
      print *, 0.2+(0.8* alpha**2 / (beta * abs(dot_product(grad,Sn)))) 
-     if (eta .gt. 1) call exit(1)
+     ! if (eta .gt. 1) call exit(1)
      v = eta*Sn-ssd
      if(delta .eq. -1.0) then
         delta = min(cauchylen,maxstep)

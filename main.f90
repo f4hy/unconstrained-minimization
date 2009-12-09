@@ -130,6 +130,7 @@ subroutine minimize(x0,fn,grad,hessian)
 10 format(4(g20.8))
 contains
   subroutine takestep()
+10  format(4(g20.8))
 
     integer :: i,j
 
@@ -156,10 +157,19 @@ contains
 
     else if (dogleg) then
        fc = fn(x)
-       gc = grad(x)
        if(analytichessian) then
           print *, "dog leg"
           temphess = hessian(x)
+          gc = grad(x)
+       else if(analyticgrad) then
+          print *, "dog leg fake hess"
+          temphess = ffdhessg(x)
+          gc = grad(x)
+       else 
+          print *, "dog leg fake grad+hess"
+          temphess = ffdhessf(x)
+          gc = ffdgrad(x)
+       end if
           call modelhess(Scaling,temphess,L)
           call cholsolve(-gc,L,Sn)
           do i=1,n
@@ -167,22 +177,18 @@ contains
                 L(i,j) = L(j,i)
              end do
           end do
+          ! print *, "grad"
+          ! print 10, gc
+          ! print *, "fullhess"
+          ! print 10, hessian(x)
+          ! print *, "hess"
+          ! print 10, temphess
+          ! print *, "L"
+          ! print 10, L
+          ! print *, "Sn"
+          ! print 10, Sn
+          ! call exit(1)
           call dogdriver(x ,fc,fn,gc,L,-Sn,maxstep,delta,nextx,nextf)
-       else if(analyticgrad) then
-          print *, "dog leg fake hess"
-          temphess = ffdhessg(x)
-          call modelhess(Scaling,temphess,L)
-          call cholsolve(grad(x),L,Sn)
-          call dogdriver(x ,fc,fn,gc,L,Sn,maxstep,delta,nextx,nextf)
-
-       else if(analyticgrad) then
-          print *, "dog leg fake grad+hess"
-          temphess = ffdhessf(x)
-          call modelhess(Scaling,temphess,L)
-          call cholsolve(ffdgrad(x),L,Sn)
-          call dogdriver(x ,fc,fn,gc,L,Sn,maxstep,delta,nextx,nextf)
-
-       end if
     else
        print *, "ERROR: NO METHOD SELECTED!"
        call exit(1)

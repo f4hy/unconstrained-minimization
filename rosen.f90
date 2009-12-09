@@ -1,5 +1,5 @@
 module size
-  integer, parameter :: n = 4
+  integer, parameter :: n = 2
 end module size
 
 module analytics
