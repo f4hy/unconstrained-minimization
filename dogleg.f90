@@ -99,22 +99,34 @@ subroutine dogstep(grad,L,Sn,newtlen,maxstep,delta,firstdog,cauchylen,eta,ssd,v,
      ! First dog
      ! COMPUTE DOG LEG
      print *, "computing dog leg curve"
-     
+10   format(4(g20.8))
+
      firstdog = .FALSE.
      alpha = norm(grad)
      print *, "alpha",alpha
-     print *, "grad",grad
+     print 10, "grad",grad
+     print *, "L"
+     print 10, L
      beta = 0.0
      do i =1,n
+        temp = 0.0
         do j=i,n
-           temp = L(j,i)*grad(i)
+           temp = temp + L(j,i)*grad(j)
         end do
         beta = beta + temp*temp
+        print *, "beta..",beta,temp
      end do
-     ssd = (alpha/beta)*grad
+     ssd = -(alpha/beta)*grad
      cauchylen = alpha*sqrt(alpha) / beta
      eta = 0.2+(0.8* alpha**2 / (beta * abs(dot_product(grad,Sn)))) 
      print *, "eta should be <1",eta
+     print *, "beta",beta
+     print *, "grad",grad
+     print *, "alpha",alpha
+     print *, "Sn",Sn
+     print *, "grad*Sn",abs(dot_product(grad,Sn))*beta
+     print *, 0.2+(0.8* alpha**2 / (beta * abs(dot_product(grad,Sn)))) 
+     if (eta .gt. 1) call exit(1)
      v = eta*Sn-ssd
      if(delta .eq. -1.0) then
         delta = min(cauchylen,maxstep)
@@ -189,7 +201,7 @@ subroutine trustregup(xc,fc,fn,grad,L,step,newttaken,maxstep,delta,xprev,fprev,n
 
   steplen = norm(step)
 
-  nextx = xc-step
+  nextx = xc+step
   print *, "stuff"
   print *, fc
   print *, fn(xc)
@@ -255,9 +267,9 @@ subroutine trustregup(xc,fc,fn,grad,L,step,newttaken,maxstep,delta,xprev,fprev,n
         do j=1,n
            temp = temp + L(j,i)*step(j)
         end do
+        dfpred = dfpred + (temp * temp/2.0)
      end do
 
-     dfpred = dfpred + (temp * temp/2.0)
      
      if (retcode .ne. 2 .and. ( abs(dfpred-df) .ge. 0.1 * abs(df) .or. df .le. initslope) .and. newttaken .eqv. .FALSE. .and. delta .le. 0.99 * maxstep) then
         ! Double delta and continue

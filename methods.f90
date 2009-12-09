@@ -194,14 +194,16 @@ subroutine UMSTOP(xplus,xc,func,grad,Sx)
      if (maxval(temp) .le. gradtol) then
         print *, "gradient small, local minimum found"
         print *, temp
-        termcode = 1 
+      termcode = 1 
         return
      end if
      
+     ! do i=1,n
+     !    temp(i) = abs(xplus(i) - xc(i)) / max(abs(xplus(i)),1/Sx(i))
+     ! end do
      do i=1,n
-        temp(i) = abs(xplus(i) - xc(i)) / max(abs(xplus(i)),1/Sx(i))
+        temp(i) = abs(xplus(i) - xc(i)) / max(abs(xplus(i)),1.0)
      end do
-     
      if(maxval(temp) .le. steptol) then
         print *, "Converged within tolerance after",iterations, "iterations"
         termcode = 2

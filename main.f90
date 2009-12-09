@@ -131,6 +131,8 @@ subroutine minimize(x0,fn,grad,hessian)
 contains
   subroutine takestep()
 
+    integer :: i,j
+
     if(nohessian) then
        if(analyticgrad) then
           print *, "lineseach stepest decent"
@@ -160,7 +162,12 @@ contains
           temphess = hessian(x)
           call modelhess(Scaling,temphess,L)
           call cholsolve(-gc,L,Sn)
-          call dogdriver(x ,fc,fn,gc,L,Sn,maxstep,delta,nextx,nextf)
+          do i=1,n
+             do j=i+1,n
+                L(i,j) = L(j,i)
+             end do
+          end do
+          call dogdriver(x ,fc,fn,gc,L,-Sn,maxstep,delta,nextx,nextf)
        else if(analyticgrad) then
           print *, "dog leg fake hess"
           temphess = ffdhessg(x)
