@@ -16,12 +16,12 @@ module optimization
   implicit none
   ! integer :: n
   real :: typf = 1
-  real :: gradtol = 0
   integer ::termcode
   integer :: retcode, iterations
 
   ! real :: maxstep = 1.0e8
 
+  real :: gradtol = 1.0e-12
   real ::  steptol = 1.0e-12
   real :: maxoff
   real :: macheps
@@ -30,7 +30,7 @@ module optimization
   logical :: hook = .FALSE.
   integer :: method
 
-  real :: globtol = 1.0e-8
+  real :: typef = 0.0
 
   logical :: nohessian = .FALSE.
   logical :: linesearch = .FALSE.
@@ -108,7 +108,7 @@ subroutine initalize()
   else if(input .eq. 6) then
      steptol = macheps
   end if
-
+  gradtol = steptol
 
 
   input = 0
@@ -186,6 +186,7 @@ subroutine UMSTOP0(x0,func,grad,Sx)
                                 !away if it is smart)
   integer :: i
 
+  typef = func
   
   do i=1,n
      temp(i) = abs(grad(i)) * (max(abs(x0(i)),1/Sx(i)) / max(abs(func),typf))
@@ -217,11 +218,15 @@ subroutine UMSTOP(xplus,xc,func,grad,Sx)
   
   if (retcode .EQ. 1) then 
      termcode = 3
+     print *, "Terminating because method failed"
      return
   else
      
+     if(abs(typef - func) .gt. 10*typf) then
+        typef = func
+     end if
      do i=1,n
-        temp(i) = max(abs(grad(i)),  abs(xplus(i)) / max(abs(func),1.0))
+        temp(i) = max(abs(grad(i)),  max(abs(xplus(i)),1.0) / max(abs(func),typf))
      end do
      print *, "temp",temp
      ! temp = abs(grad)
