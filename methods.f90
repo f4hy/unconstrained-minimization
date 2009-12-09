@@ -537,8 +537,12 @@ subroutine FDJAC(x0,f0,grad,Jacob)
      do i=1,n
         Jacob(i,j) = (tempgrad(i) - f0(i)) /stepsizej
      end do
+
+
      xtemp(j) = tempj
+
   end do
+
 
 end subroutine FDJAC
 
@@ -575,7 +579,7 @@ function ffdhessf(x0) result(H)
   tempx = x0
   cuberteta = macheps**(1.0/3.0)
   do i =1,n
-     stepsize(i) = cuberteta*tempx(i)
+     stepsize(i) = cuberteta*sign(max(abs(tempx(i)),1.0),tempx(i))
      tempi = tempx(i)
      tempx(i) = tempx(i) + stepsize(i)
      stepsize(i) = tempx(i) - tempi
@@ -622,7 +626,7 @@ function FFDGRAD(x0) result(g)
 
 
   do j=1,n
-     stepsizej = sqrteta * tempx(j)
+     stepsizej = sqrteta *  sign(max(abs(tempx(j)),1.0),tempx(j))
      tempj = tempx(j)
      tempx(j) = tempx(j) + stepsizej
      stepsizej = tempx(j) - tempj
@@ -645,6 +649,7 @@ function FFDHESSG(x0) result(H)
   g0 = grad(x0)
 
   call FDJAC(x0,g0,grad,H)
+
   do i =1,n-1
      do j =i+1,n
         H(i,j) = (H(i,j)+H(j,i))/2
