@@ -11,6 +11,8 @@ flags	= -CB -r8 -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -
 
 openmp	= -fopenmp
 
+main = methods.f90 main.f90 linesearch.f90 dogleg.f90
+
 all: rosen.exe powell.exe wood.exe
 
 rosen: rosen.exe
@@ -26,14 +28,14 @@ tests:	 runtests.exe
 runtests.exe: testmethods.f90 methods.f90
 	${compiler} ${flags} -o runtests.exe testmethods.f90 methods.f90
 
-rosen.exe: rosen.f90  main.f90 methods.f90  linesearch.f90
-	${compiler} ${flags} -o rosen.exe rosen.f90 methods.f90 main.f90  linesearch.f90
+rosen.exe: rosen.f90  ${main}
+	${compiler} ${flags} -o rosen.exe rosen.f90 ${main}
 
-powell.exe: powell.f90  main.f90 methods.f90  linesearch.f90
-	${compiler} ${flags} -o powell.exe powell.f90 methods.f90 main.f90  linesearch.f90
+powell.exe: powell.f90  ${main}
+	${compiler} ${flags} -o powell.exe powell.f90 ${main}
 
-wood.exe: wood.f90  main.f90 methods.f90  linesearch.f90
-	${compiler} ${flags} -o wood.exe wood.f90 methods.f90 main.f90  linesearch.f90
+wood.exe: wood.f90  ${main}
+	${compiler} ${flags} -o wood.exe wood.f90 ${main}
 
 # rosen.intel.exe: rosen.f90  main.f90 methods.f90  linesearch.f90
 # 	${compiler} ${flags} -o rosen.intel.exe rosen.f90 methods.f90 main.f90  linesearch.f90
