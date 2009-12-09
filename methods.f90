@@ -80,9 +80,38 @@ subroutine initalize()
 
   call computemacheps()
   
+
+
   print *, "Machine precision set down to", macheps
 
-  steptol = macheps*10
+  do while(input .lt. 1 .or.  input .gt. 6)
+     print *, "To what accuracy do you want to minimize the problem?"
+     print *, "1. 10^-4"
+     print *, "2. 10^-8"
+     print *, "3. 10^-10"
+     print *, "4. 10^-12"
+     print *, "5. Macheps*10",macheps*10
+     print *, "6. Macheps",macheps
+     read(5,*) input
+     print *, "input",input
+  end do
+  if(input .eq. 1) then
+     steptol = 1.0e-4
+  else if(input .eq. 2) then
+     steptol = 1.0e-8
+  else if(input .eq. 3) then
+     steptol = 1.0e-10
+  else if(input .eq. 4) then
+     steptol = 1.0e-12
+  else if(input .eq. 5) then
+     steptol = macheps*10
+  else if(input .eq. 6) then
+     steptol = macheps
+  end if
+
+
+
+  input = 0
 
   do while(input .lt. 1 .or.  input .gt. 5)
      print *, "Which analytics would you like to use?"
