@@ -121,14 +121,5 @@ program powell
   print *, grad(x0)
 
   call minimize(x0,fn,grad,hessian)
-
-  !  print *, "Newton"
-  ! call backtrackinglinesearch(x0,p,x,f,grad,hessian)
-    
-  ! ! call backtrackinglineserach(x0,p,x,powell,grad,hessian)
-  ! print *, "steepest"
-  ! ! call backtrackinglineserach(x0,p,x,powell,grad)
-  ! call test()
-  ! 
 end program powell
 
