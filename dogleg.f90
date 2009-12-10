@@ -58,8 +58,6 @@ subroutine dogdriver(xc,fc,fn,grad,L,Sn,maxstep,delta,nextx,nextf)
 
   end do
 
-  ! print *, "RETCODE AFTER DOG",retcode
-
 end subroutine dogdriver
 
 subroutine dogstep(grad,L,Sn,newtlen,maxstep,delta,firstdog,cauchylen,eta,ssd,v,step,newttaken)
@@ -306,5 +304,7 @@ subroutine trustregup(xc,fc,fn,grad,L,step,newttaken,maxstep,delta,xprev,fprev,n
         end if
      end if
   end if
+
+
 
 end subroutine trustregup

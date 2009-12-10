@@ -106,7 +106,8 @@ subroutine minimize(x0,fn,grad,hessian)
   ! call exit(1)
 
   
-  call UMSTOP0(x0,fn(x0),grad(x0),Scaling)
+  call UMSTOP0(x0,fn(x0),grad(x0))
+
   if(termcode .gt. 0) then
      print *, "terminating before starting with code",termcode
      call exit(1)
@@ -114,11 +115,15 @@ subroutine minimize(x0,fn,grad,hessian)
 
   x = x0
 
+  write(10,*) x(1),",",x(2),",", fn(x)
   do iterations=0,maxiterations
-
+ 
      call takestep()
-     call UMSTOP(nextx,x,fn(x),grad(nextx),Scaling)
+
+     call UMSTOP(nextx,x,fn(x),grad(nextx))
+
      x = nextx
+
      write(7,*) fn(x)
      write(10,*) x(1),",",x(2),",", fn(x)
      if(termcode .gt. 0) then
