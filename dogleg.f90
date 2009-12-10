@@ -31,11 +31,12 @@ subroutine dogdriver(xc,fc,fn,grad,L,Sn,maxstep,delta,nextx,nextf)
   real :: v(n)
   real :: step(n)
 
-  real :: xprev
+  real :: xprev(n)
   real :: fprev
 
   logical :: newttaken
   logical :: done
+
 
   maxtaken = .FALSE.
   retcode = 0
