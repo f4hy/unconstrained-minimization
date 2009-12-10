@@ -67,8 +67,11 @@ subroutine initalize()
 
   integer :: input =0
   
-  open(unit=7,file="testfile")
+  open(unit=7,file="functionvalues.out")
 
+  open(unit=8,file="delta.out")
+  open(unit=9,file="line.out")
+  open(unit=10,file="x.out")
 
   alpha = 1.0
   beta = 1.0

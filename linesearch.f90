@@ -81,6 +81,9 @@ subroutine backtrackinglinesearch(x0,p,x,f,grad,hessian)
   do while (f(x+a*p) .GT. f(x) + c*a*sum(p * grad(x)))
      a = contraction*a
   end do
+  
+  write(9,*) a
+
   x = x+a*p
   ! print 30, iterations, x , a, f(x), (abs(f(x) - previous))
   ! if(abs(f(x) - previous) .LT. tol) then

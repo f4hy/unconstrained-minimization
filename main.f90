@@ -118,6 +118,8 @@ subroutine minimize(x0,fn,grad,hessian)
      call takestep()
      call UMSTOP(nextx,x,fn(x),grad(nextx),Scaling)
      x = nextx
+     write(7,*) fn(x)
+     write(10,*) x(1),",",x(2),",", fn(x)
      if(termcode .gt. 0) then
         ! print *, "terminating with code",termcode
         exit

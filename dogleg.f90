@@ -46,15 +46,18 @@ subroutine dogdriver(xc,fc,fn,grad,L,Sn,maxstep,delta,nextx,nextf)
   
   do while( .not. done)
      call dogstep(grad,L,Sn,newtlen,maxstep,delta,firstdog,cauchylen,eta,ssd,v,step,newttaken)
-     print *, "finished step", step
+     ! print *, "finished step", step
      call trustregup(xc,fc,fn,grad,L,step,newttaken,maxstep,delta,xprev,fprev,nextx,nextf)
+
+     write(8,*) delta
+
      if(retcode .lt. 2) then
         done = .TRUE.
      end if
 
   end do
 
-  print *, "RETCODE AFTER DOG",retcode
+  ! print *, "RETCODE AFTER DOG",retcode
 
 end subroutine dogdriver
 
