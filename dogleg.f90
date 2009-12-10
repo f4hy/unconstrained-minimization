@@ -233,7 +233,8 @@ subroutine trustregup(xc,fc,fn,grad,L,step,newttaken,maxstep,delta,xprev,fprev,n
      return
   
   else if (df .gt. alpha*initslope) then
-     rellength = maxval( (abs(step)) / abs(nextx) )
+
+     rellength = maxval( (abs(step)) / max(abs(nextx),1.0) )
      
      if (rellength .lt. steptol) then
         ! nextx-xc too small, terminate
