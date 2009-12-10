@@ -60,6 +60,8 @@ subroutine backtrackinglinesearch(x0,p,x,f,grad,hessian)
   end interface
 
   real :: previous
+  integer :: backtracks
+  backtracks = 0
   ! integer :: iterations = 0
 
 
@@ -80,9 +82,10 @@ subroutine backtrackinglinesearch(x0,p,x,f,grad,hessian)
   ! Could be more sophisticated here on how to find step size.
   do while (f(x+a*p) .GT. f(x) + c*a*sum(p * grad(x)))
      a = contraction*a
+     backtracks = backtracks+1
   end do
   
-  write(9,*) a
+  write(9,*) backtracks
 
   x = x+a*p
   ! print 30, iterations, x , a, f(x), (abs(f(x) - previous))

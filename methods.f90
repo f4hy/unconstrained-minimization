@@ -39,7 +39,7 @@ module optimization
   logical :: analytichessian = .TRUE.
 
   integer, parameter :: linsearch = 1
-  integer, parameter :: maxiterations = 10000
+  integer, parameter :: maxiterations = 100000
   
 
   contains

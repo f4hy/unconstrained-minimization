@@ -137,6 +137,21 @@ subroutine minimize(x0,fn,grad,hessian)
   print 10, x
   print *, "Function value at final point"
   print 10, fn(x)
+
+open(unit=11,file="answer.out")
+  write(11,*) "terminated with code",termcode
+  write(11,*) "stopped after iterations",iterations
+  write(11,*) "final point"
+  write(11,10)  x
+  write(11,*) "Function value at final point"
+  write(11,10) fn(x)
+  
+
+  close(7)
+  close(8)
+  close(9)
+  close(10)
+  close(11)
   
 10 format(4(g15.8))
 contains
