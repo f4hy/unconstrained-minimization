@@ -120,7 +120,6 @@ subroutine newtondirection(grad,hessian,point,direction)
   use size
   real, intent(in) :: point(:)
   real, intent(out) :: direction(:)
-  real :: D
   interface
      function grad(p) Result(del)
        use size
@@ -137,7 +136,7 @@ subroutine newtondirection(grad,hessian,point,direction)
   real :: ipv(n)
   real :: info
   real :: H(n,n)
-
+  integer :: i,j
   g= -grad(point)
   H = hessian(point)
 

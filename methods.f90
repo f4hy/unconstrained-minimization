@@ -64,7 +64,9 @@ end module optimization
 
 subroutine initalize()
   use optimization
+  implicit none
 
+  
   integer :: input =0
   
   open(unit=7,file="functionvalues.out")
@@ -73,8 +75,6 @@ subroutine initalize()
   open(unit=9,file="line.out")
   open(unit=10,file="x.out")
 
-  alpha = 1.0
-  beta = 1.0
 
   if (n.lt. 1) then
      termcode = -1
@@ -172,7 +172,7 @@ end subroutine INITALIZE
 
 
 
-subroutine UMSTOP0(x0,func,grad,Sx)
+subroutine UMSTOP0(x0,func,grad)
   ! Decide weather to terminate after iteraction zero because x0 is
   ! too close to a critical point
   
@@ -183,7 +183,6 @@ subroutine UMSTOP0(x0,func,grad,Sx)
   real, intent(in) :: x0(n)
   real, intent(in) :: func
   real, intent(in) :: grad(n)
-  real, intent(in) :: Sx(n)
   real :: temp(n)               !Temp storage while looking for max
                                 !(The compiler should optimize this
                                 !away if it is smart)
@@ -192,7 +191,7 @@ subroutine UMSTOP0(x0,func,grad,Sx)
   typef = func
   
   do i=1,n
-     temp(i) = abs(grad(i)) * (max(abs(x0(i)),1/Sx(i)) / max(abs(func),typf))
+     temp(i) = abs(grad(i)) * (max(abs(x0(i)),1.0) / max(abs(func),typf))
   end do
   if (maxval(temp) .le. gradtol * 1.0e-3 ) then
      termcode = 1 
@@ -201,7 +200,7 @@ subroutine UMSTOP0(x0,func,grad,Sx)
   termcode = 0
 end subroutine UMSTOP0
 
-subroutine UMSTOP(xplus,xc,func,grad,Sx)
+subroutine UMSTOP(xplus,xc,func,grad)
   ! Decide weather to terminate after iteraction zero because x0 is
   ! too close to a critical point
 
@@ -211,7 +210,6 @@ subroutine UMSTOP(xplus,xc,func,grad,Sx)
   real, intent(in) :: xplus(n)
   real, intent(in) :: xc(n)
   real, intent(in) :: grad(n)
-  real, intent(in) :: Sx(n)
   real, intent(in) :: func
   real :: temp(n) 
   integer :: i

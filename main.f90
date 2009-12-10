@@ -1,5 +1,6 @@
 subroutine minimize(x0,fn,grad,hessian)
   use optimization
+  use size
   implicit none
   real, intent(in) :: x0(n)
 

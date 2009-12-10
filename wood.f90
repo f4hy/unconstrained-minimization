@@ -9,8 +9,6 @@ contains
     real :: p(n)
     real :: x1,x2,x3,x4
 
-    real :: f(n)
-    integer :: i
     x1 = p(1)
     x2 = p(2)
     x3 = p(3)
@@ -26,7 +24,6 @@ contains
     real :: p(n)
     real :: del(n)
     real :: x1,x2,x3,x4
-    integer :: i
 
     x1 = p(1)
     x2 = p(2)
@@ -88,9 +85,7 @@ program wood
   use size
   use analytics
   real :: x0(n)
-  integer :: i
 
-  print *, "start?"
  
   x0(1) = -3
   x0(2) = -1

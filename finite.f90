@@ -114,7 +114,7 @@ function FFDGRAD(x0) result(g)
   real :: stepsizej
   real :: tempj
   real :: tempx(n)
-  integer :: i,j
+  integer :: j
   real :: f0
 
   f0 = fn(x0)

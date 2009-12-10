@@ -57,7 +57,7 @@ contains
     real :: hess(n,n)
     real :: p(n)
     real :: x1,x2,x3,x4
-    integer :: one,two,tre,for
+    integer :: one,two,thr,for
     integer :: i
 
     hess = 0
