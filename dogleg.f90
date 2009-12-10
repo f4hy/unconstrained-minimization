@@ -103,10 +103,10 @@ subroutine dogstep(grad,L,Sn,newtlen,maxstep,delta,firstdog,cauchylen,eta,ssd,v,
 
      firstdog = .FALSE.
      alpha = norm(grad)**2
-     print *, "alpha",alpha
-     print 10, "grad",grad
-     print *, "L"
-     print 10, L
+     ! print *, "alpha",alpha
+     ! print 10, "grad",grad
+     ! print *, "L"
+     ! print 10, L
      beta = 0.0
      do i =1,n
         temp = 0.0
@@ -114,18 +114,18 @@ subroutine dogstep(grad,L,Sn,newtlen,maxstep,delta,firstdog,cauchylen,eta,ssd,v,
            temp = temp + L(j,i)*grad(j)
         end do
         beta = beta + temp*temp
-        print *, "beta..",beta,temp
+        ! print *, "beta..",beta,temp
      end do
      ssd = -(alpha/beta)*grad
      cauchylen = alpha*sqrt(alpha) / beta
      eta = 0.2+(0.8* alpha**2 / (beta * abs(dot_product(grad,Sn)))) 
-     print *, "eta should be <1",eta
-     print *, "beta",beta
-     print *, "grad",grad
-     print *, "alpha",alpha
-     print *, "Sn",Sn
-     print *, "grad*Sn",abs(dot_product(grad,Sn))*beta
-     print *, 0.2+(0.8* alpha**2 / (beta * abs(dot_product(grad,Sn)))) 
+     ! print *, "eta should be <1",eta
+     ! print *, "beta",beta
+     ! print *, "grad",grad
+     ! print *, "alpha",alpha
+     ! print *, "Sn",Sn
+     ! print *, "grad*Sn",abs(dot_product(grad,Sn))*beta
+     ! print *, 0.2+(0.8* alpha**2 / (beta * abs(dot_product(grad,Sn)))) 
      ! if (eta .gt. 1) call exit(1)
      v = eta*Sn-ssd
      if(delta .eq. -1.0) then
@@ -141,9 +141,9 @@ subroutine dogstep(grad,L,Sn,newtlen,maxstep,delta,firstdog,cauchylen,eta,ssd,v,
   else if (cauchylen .ge. delta) then
      ! Steepest descent
      print *, "stepest decent"
-     print *, delta
-     print *, cauchylen
-     print *, ssd
+     ! print *, delta
+     ! print *, cauchylen
+     ! print *, ssd
      step = (delta/cauchylen) * ssd
      return
   else
@@ -202,20 +202,20 @@ subroutine trustregup(xc,fc,fn,grad,L,step,newttaken,maxstep,delta,xprev,fprev,n
   steplen = norm(step)
 
   nextx = xc+step
-  print *, "stuff"
-  print *, fc
-  print *, fn(xc)
-  print *, "xc",xc
-  print *, step
-  print *, xc+step
-  print *, "nextx",nextx
+  ! print *, "stuff"
+  ! print *, fc
+  ! print *, fn(xc)
+  ! print *, "xc",xc
+  ! print *, step
+  ! print *, xc+step
+  ! print *, "nextx",nextx
 
-  print *, fn(nextx)
-  print *, "funccal?", fc, fn(xc-step)
+  ! print *, fn(nextx)
+  ! print *, "funccal?", fc, fn(xc-step)
   nextf = fn(nextx)
-  print *, "funcall!",nextf
+  ! print *, "funcall!",nextf
   df = nextf-fc
-  print *, "df should be negatve",df
+  ! print *, "df should be negatve",df
 
   initslope = dot_product(grad,step)
   

@@ -125,8 +125,12 @@ subroutine minimize(x0,fn,grad,hessian)
   end do
 
   print *, "stopped after iterations",iterations
-  print 10, "final point",x
-10 format(4(g20.8))
+  print *, "final point"
+  print 10, x
+  print *, "Function value at final point"
+  print 10, fn(x)
+  
+10 format(4(g15.8))
 contains
   subroutine takestep()
 10  format(4(g20.8))
